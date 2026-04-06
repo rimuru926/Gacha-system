@@ -145,6 +145,32 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 .mod-btn-export:hover { opacity: 0.85; transform: translateY(-1px); }
 .mod-btn-logout { background: rgba(255,255,255,0.05); color: var(--text-dim); border: 1px solid var(--border); }
 .mod-btn-logout:hover { color: #f87171; border-color: rgba(248,113,113,0.4); }
+.mod-btn-gist-save { background: linear-gradient(135deg, #238636, #2ea043); color: #fff; }
+.mod-btn-gist-save:hover { opacity: 0.85; transform: translateY(-1px); }
+.mod-btn-gist-load { background: linear-gradient(135deg, #1f6feb, #388bfd); color: #fff; }
+.mod-btn-gist-load:hover { opacity: 0.85; transform: translateY(-1px); }
+
+.gist-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); z-index: 2000; align-items: center; justify-content: center; padding: 24px; }
+.gist-modal-overlay.open { display: flex; }
+.gist-modal { background: var(--surface); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; max-width: 520px; width: 100%; padding: 28px; position: relative; animation: cardReveal 0.3s ease; }
+.gist-modal-title { font-family: 'Cinzel', serif; font-size: 1rem; letter-spacing: 0.2em; color: #ffd700; margin-bottom: 6px; }
+.gist-modal-sub { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.15em; color: var(--text-dim); margin-bottom: 20px; line-height: 1.7; }
+.gist-modal-sub a { color: #60a5fa; text-decoration: none; }
+.gist-modal-sub a:hover { text-decoration: underline; }
+.gist-field { margin-bottom: 14px; }
+.gist-field label { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.2em; color: var(--text-dim); display: block; margin-bottom: 6px; }
+.gist-field input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); font-family: 'Crimson Pro', serif; font-size: 14px; outline: none; transition: border-color 0.2s; }
+.gist-field input:focus { border-color: rgba(255,215,0,0.4); }
+.gist-modal-btns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+.gist-modal-btn { font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; letter-spacing: 0.15em; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: none; flex: 1; }
+.gist-modal-btn-confirm-save { background: linear-gradient(135deg, #238636, #2ea043); color: #fff; }
+.gist-modal-btn-confirm-load { background: linear-gradient(135deg, #1f6feb, #388bfd); color: #fff; }
+.gist-modal-btn-cancel { background: rgba(255,255,255,0.05); color: var(--text-dim); border: 1px solid var(--border); flex: 0 0 auto; }
+.gist-modal-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+.gist-status { font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.1em; margin-top: 12px; min-height: 18px; text-align: center; }
+.gist-status.ok { color: #4ade80; }
+.gist-status.err { color: #f87171; }
+.gist-status.busy { color: #fbbf24; }
 
 .mod-filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
 .mod-filter-bar select { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--text); font-family: 'Cinzel', serif; font-size: 12px; outline: none; cursor: pointer; }
@@ -1822,6 +1848,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
         <div class="mod-actions">
           <button class="mod-btn mod-btn-add" onclick="openEntryForm()">+ ADD ENTRY</button>
           <button class="mod-btn mod-btn-export" onclick="exportHTML()">⬇ EXPORT HTML</button>
+          <button class="mod-btn mod-btn-gist-save" onclick="openGistModal('save')">☁ SAVE TO GIST</button>
+          <button class="mod-btn mod-btn-gist-load" onclick="openGistModal('load')">☁ LOAD FROM GIST</button>
           <button class="mod-btn mod-btn-logout" onclick="modLogout()">LOCK</button>
         </div>
       </div>
@@ -6708,6 +6736,124 @@ document.querySelectorAll('.entry').forEach(entry => {
 window.addEventListener('scroll', () => {
   document.getElementById('scroll-top').classList.toggle('visible', window.scrollY > 400);
 });
+
+// ==================== GITHUB GIST SYNC ====================
+let gistMode = 'save'; // 'save' or 'load'
+const GIST_FILENAME = 'gacha-entries.json';
+
+function openGistModal(mode) {
+  gistMode = mode;
+  document.getElementById('gist-modal-title').textContent = mode === 'save' ? '☁ SAVE TO GITHUB GIST' : '☁ LOAD FROM GITHUB GIST';
+  document.getElementById('gist-btn-confirm').textContent = mode === 'save' ? 'SAVE TO GIST' : 'LOAD FROM GIST';
+  document.getElementById('gist-btn-confirm').className = 'gist-modal-btn ' + (mode === 'save' ? 'gist-modal-btn-confirm-save' : 'gist-modal-btn-confirm-load');
+  document.getElementById('gist-status').textContent = '';
+  document.getElementById('gist-status').className = 'gist-status';
+  // Restore saved credentials if any
+  const saved = getSavedGistCreds();
+  if (saved.token) document.getElementById('gist-token').value = saved.token;
+  if (saved.gistId) document.getElementById('gist-id').value = saved.gistId;
+  document.getElementById('gist-modal').classList.add('open');
+}
+
+function closeGistModal() {
+  document.getElementById('gist-modal').classList.remove('open');
+}
+
+function getSavedGistCreds() {
+  try {
+    return JSON.parse(sessionStorage.getItem('gist-creds') || '{}');
+  } catch { return {}; }
+}
+
+function saveGistCreds(token, gistId) {
+  sessionStorage.setItem('gist-creds', JSON.stringify({ token, gistId }));
+}
+
+function setGistStatus(msg, type) {
+  const el = document.getElementById('gist-status');
+  el.textContent = msg;
+  el.className = 'gist-status ' + type;
+}
+
+async function confirmGistAction() {
+  const token = document.getElementById('gist-token').value.trim();
+  const gistId = document.getElementById('gist-id').value.trim();
+  if (!token) { setGistStatus('GitHub token is required.', 'err'); return; }
+
+  const headers = {
+    'Authorization': 'Bearer ' + token,
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+    'Content-Type': 'application/json'
+  };
+
+  if (gistMode === 'save') {
+    setGistStatus('Saving…', 'busy');
+    const body = { description: 'Gacha System Entries', public: false, files: { [GIST_FILENAME]: { content: JSON.stringify(entries, null, 2) } } };
+    try {
+      let res, data;
+      if (gistId) {
+        // Update existing gist
+        res = await fetch('https://api.github.com/gists/' + gistId, { method: 'PATCH', headers, body: JSON.stringify(body) });
+      } else {
+        // Create new gist
+        res = await fetch('https://api.github.com/gists', { method: 'POST', headers, body: JSON.stringify(body) });
+      }
+      data = await res.json();
+      if (!res.ok) { setGistStatus('Error: ' + (data.message || res.status), 'err'); return; }
+      const newId = data.id;
+      document.getElementById('gist-id').value = newId;
+      saveGistCreds(token, newId);
+      setGistStatus('✓ Saved! Gist ID: ' + newId, 'ok');
+    } catch (e) { setGistStatus('Network error: ' + e.message, 'err'); }
+
+  } else {
+    // load
+    if (!gistId) { setGistStatus('Gist ID is required to load.', 'err'); return; }
+    setGistStatus('Loading…', 'busy');
+    try {
+      const res = await fetch('https://api.github.com/gists/' + gistId, { headers });
+      const data = await res.json();
+      if (!res.ok) { setGistStatus('Error: ' + (data.message || res.status), 'err'); return; }
+      const file = data.files[GIST_FILENAME];
+      if (!file) { setGistStatus('No file "' + GIST_FILENAME + '" found in that Gist.', 'err'); return; }
+      const loaded = JSON.parse(file.content);
+      if (!Array.isArray(loaded)) { setGistStatus('Invalid entries format in Gist.', 'err'); return; }
+      if (!confirm('Load ' + loaded.length + ' entries from Gist? This will replace the current entries.')) { setGistStatus('Cancelled.', 'err'); return; }
+      entries = loaded;
+      saveGistCreds(token, gistId);
+      renderModTable();
+      rebuildBrowse();
+      setGistStatus('✓ Loaded ' + loaded.length + ' entries from Gist!', 'ok');
+    } catch (e) { setGistStatus('Error parsing Gist data: ' + e.message, 'err'); }
+  }
+}
 </script>
+
+<!-- GIST MODAL -->
+<div class="gist-modal-overlay" id="gist-modal" onclick="if(event.target===this)closeGistModal()">
+  <div class="gist-modal">
+    <button class="modal-close" onclick="closeGistModal()">✕</button>
+    <div class="gist-modal-title" id="gist-modal-title">☁ GITHUB GIST SYNC</div>
+    <div class="gist-modal-sub">
+      Sync your entries to a private GitHub Gist for backup and cross-device access.<br>
+      Your token needs the <strong style="color:#fde68a">gist</strong> scope.
+      <a href="https://github.com/settings/tokens/new?scopes=gist&description=GachaSync" target="_blank" rel="noopener">Create token ↗</a>
+    </div>
+    <div class="gist-field">
+      <label>GITHUB PERSONAL ACCESS TOKEN</label>
+      <input type="password" id="gist-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+    </div>
+    <div class="gist-field">
+      <label>GIST ID <span style="opacity:0.5;font-size:9px">(leave blank to create new when saving)</span></label>
+      <input type="text" id="gist-id" placeholder="e.g. 4a7b3c1d2e5f6a8b9c0d..." autocomplete="off">
+    </div>
+    <div class="gist-modal-btns">
+      <button class="gist-modal-btn gist-modal-btn-confirm-save" id="gist-btn-confirm" onclick="confirmGistAction()">SAVE TO GIST</button>
+      <button class="gist-modal-btn gist-modal-btn-cancel" onclick="closeGistModal()">CANCEL</button>
+    </div>
+    <div class="gist-status" id="gist-status"></div>
+  </div>
+</div>
 
 </body></html>
