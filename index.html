@@ -7491,7 +7491,18 @@ setInterval(() => {
           <tr><th>Rank</th><th>Rank Label</th><th>Type</th><th>Name</th><th>Description</th></tr>
           ${rows}
         </table>
-      
+      </body>
+      </html>`;
+    const blob = new Blob([table], { type: 'application/vnd.ms-excel' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'gacha_entries.xls';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+})();
+</script>
 <script id="collection-refinement">
 (function() {
     // Override updateCollection to track counts
