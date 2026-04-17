@@ -7608,12 +7608,5 @@ document.addEventListener("DOMContentLoaded", ()=>{
   const saved = localStorage.getItem('theme') || 'gold';
   applyTheme(saved);
 });
-</script>
-<script>
-function switchTab(id){
- document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
- const el=document.getElementById(id);
- if(el){el.classList.add('active');}
-}
 </script></body>
 </html>
