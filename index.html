@@ -48,10 +48,12 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 .result-area { min-height: 200px; display: flex; align-items: center; justify-content: center; }
 .result-placeholder { color: var(--text-dim); font-style: italic; font-size: 15px; }
 
-.result-card { max-width: 480px; width: 100%; border-radius: 16px; padding: 28px; text-align: left; animation: cardReveal 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; overflow: hidden; }
+.result-card { max-width: 480px; width: 100%; border-radius: 16px; padding: 28px; text-align: left; position: relative; overflow: hidden; }
+.result-card.animated { animation: cardReveal 0.45s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .result-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 60%); pointer-events: none; }
 @keyframes cardReveal { from { opacity: 0; transform: scale(0.8) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-.result-card-shine { position: absolute; inset: -50%; background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.08) 50%, transparent 70%); animation: shine 1s ease-out 0.3s forwards; opacity: 0; }
+.result-card-shine { position: absolute; inset: -50%; background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.08) 50%, transparent 70%); display: none; opacity: 0; }
+.result-card.animated .result-card-shine { display: block; animation: shine 1s ease-out 0.3s forwards; opacity: 0; }
 @keyframes shine { from { transform: translateX(-100%); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
 .result-rank-badge { display: inline-block; font-family: 'Cinzel', serif; font-size: 12px; font-weight: 700; letter-spacing: 0.2em; padding: 5px 14px; border-radius: 20px; color: #fff; margin-bottom: 14px; }
 .result-type { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.3em; opacity: 0.6; margin-bottom: 8px; }
@@ -61,10 +63,34 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 .multi-results { width: 100%; max-width: 900px; animation: fadeIn 0.4s ease; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .multi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; margin-bottom: 20px; }
-.multi-card { border-radius: 10px; padding: 14px 12px; text-align: center; cursor: pointer; transition: all 0.2s; border: 1px solid; animation: cardPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.multi-card { border-radius: 10px; padding: 14px 12px; text-align: center; cursor: pointer; transition: all 0.2s; border: 1px solid; }
+.multi-card.animated { animation: cardPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 .multi-card:hover { transform: translateY(-3px) scale(1.02); }
 @keyframes cardPop { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
 .multi-card-rank { font-family: 'Cinzel', serif; font-size: 28px; font-weight: 900; margin-bottom: 6px; }
+
+/* Rank-specific pull animations */
+@keyframes pulseGrey { from { box-shadow: 0 0 10px rgba(148,163,184,0.24); } to { box-shadow: 0 0 20px rgba(148,163,184,0.45); } }
+@keyframes pulseGreen { from { box-shadow: 0 0 10px rgba(52,211,153,0.24); } to { box-shadow: 0 0 20px rgba(52,211,153,0.45); } }
+@keyframes pulseBlue { from { box-shadow: 0 0 10px rgba(96,165,250,0.24); } to { box-shadow: 0 0 20px rgba(96,165,250,0.45); } }
+@keyframes pulsePurple { from { box-shadow: 0 0 10px rgba(192,132,252,0.24); } to { box-shadow: 0 0 20px rgba(192,132,252,0.45); } }
+@keyframes pulseRed { from { box-shadow: 0 0 10px rgba(248,113,113,0.24); } to { box-shadow: 0 0 20px rgba(248,113,113,0.45); } }
+@keyframes pulseGold { from { box-shadow: 0 0 10px rgba(255,215,0,0.32); } to { box-shadow: 0 0 22px rgba(255,215,0,0.55); } }
+@keyframes rainbowGlow { 0% { box-shadow: 0 0 14px rgba(255,255,255,0.75); filter: hue-rotate(0deg); } 50% { box-shadow: 0 0 25px rgba(255,255,255,0.95); filter: hue-rotate(180deg); } 100% { box-shadow: 0 0 14px rgba(255,255,255,0.75); filter: hue-rotate(360deg); } }
+.result-card.animated.rank-anim-F { animation: cardReveal 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), pulseGrey 2s ease-in-out infinite alternate; }
+.result-card.animated.rank-anim-E { animation: cardReveal 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), pulseGreen 2s ease-in-out infinite alternate; }
+.result-card.animated.rank-anim-D { animation: cardReveal 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), pulseBlue 2s ease-in-out infinite alternate; }
+.result-card.animated.rank-anim-C { animation: cardReveal 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), pulsePurple 2s ease-in-out infinite alternate; }
+.result-card.animated.rank-anim-B { animation: cardReveal 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), pulseRed 2s ease-in-out infinite alternate; }
+.result-card.animated.rank-anim-A { animation: cardReveal 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), pulseGold 2s ease-in-out infinite alternate; }
+.result-card.animated.rank-anim-S { animation: cardReveal 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), rainbowGlow 2.5s linear infinite; }
+.multi-card.animated.rank-anim-F { animation: cardPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both, pulseGrey 2s ease-in-out infinite alternate; }
+.multi-card.animated.rank-anim-E { animation: cardPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both, pulseGreen 2s ease-in-out infinite alternate; }
+.multi-card.animated.rank-anim-D { animation: cardPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both, pulseBlue 2s ease-in-out infinite alternate; }
+.multi-card.animated.rank-anim-C { animation: cardPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both, pulsePurple 2s ease-in-out infinite alternate; }
+.multi-card.animated.rank-anim-B { animation: cardPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both, pulseRed 2s ease-in-out infinite alternate; }
+.multi-card.animated.rank-anim-A { animation: cardPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both, pulseGold 2s ease-in-out infinite alternate; }
+.multi-card.animated.rank-anim-S { animation: cardPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both, rainbowGlow 2.5s linear infinite; }
 .multi-card-name { font-family: 'Cinzel', serif; font-size: 11px; font-weight: 600; line-height: 1.3; opacity: 0.9; }
 .multi-card-type { font-size: 10px; opacity: 0.5; margin-top: 4px; font-family: 'Cinzel', serif; letter-spacing: 0.1em; }
 .multi-summary { font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.15em; color: var(--text-dim); text-align: center; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--border); }
@@ -6089,6 +6115,24 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 const RANK_COLORS = {"S": {"accent": "#ffd700", "badge": "linear-gradient(135deg, #ffd700, #ff8c00)", "glow": "#ffd700", "card": "linear-gradient(135deg, #2a1500, #1a0a00)", "border": "#ffd700"}, "A": {"accent": "#c084fc", "badge": "linear-gradient(135deg, #c084fc, #7c3aed)", "glow": "#a855f7", "card": "linear-gradient(135deg, #1a0a2a, #0a0a1a)", "border": "#c084fc"}, "B": {"accent": "#34d399", "badge": "linear-gradient(135deg, #34d399, #059669)", "glow": "#10b981", "card": "linear-gradient(135deg, #002a14, #001a0a)", "border": "#34d399"}, "C": {"accent": "#60a5fa", "badge": "linear-gradient(135deg, #60a5fa, #2563eb)", "glow": "#3b82f6", "card": "linear-gradient(135deg, #001830, #001020)", "border": "#60a5fa"}, "D": {"accent": "#e879f9", "badge": "linear-gradient(135deg, #e879f9, #a21caf)", "glow": "#d946ef", "card": "linear-gradient(135deg, #200020, #100010)", "border": "#e879f9"}, "E": {"accent": "#fb923c", "badge": "linear-gradient(135deg, #fb923c, #c2410c)", "glow": "#f97316", "card": "linear-gradient(135deg, #201200, #100a00)", "border": "#fb923c"}, "F": {"accent": "#94a3b8", "badge": "linear-gradient(135deg, #94a3b8, #475569)", "glow": "#64748b", "card": "linear-gradient(135deg, #141414, #0a0a0a)", "border": "#94a3b8"}};
 const RANK_LABELS = {"S": "GOD-LIKE", "A": "DEMI-GOD", "B": "PEAK MORTAL", "C": "ELITE", "D": "ADVANCED", "E": "STANDARD", "F": "BASIC"};
 const RANKS = ['S','A','B','C','D','E','F'];
+const PULL_ANIMATION_KEY = 'pullAnimationEnabled';
+let pullAnimationEnabled = localStorage.getItem(PULL_ANIMATION_KEY) === 'true';
+
+function setPullAnimation(enabled) {
+  pullAnimationEnabled = enabled;
+  localStorage.setItem(PULL_ANIMATION_KEY, enabled);
+  const toggle = document.getElementById('pull-animation-toggle');
+  if (toggle) toggle.checked = enabled;
+}
+
+function initPullSettings() {
+  const saved = localStorage.getItem(PULL_ANIMATION_KEY) === 'true';
+  setPullAnimation(saved);
+}
+
+function pullAnimationClass(rank) {
+  return pullAnimationEnabled ? `animated rank-anim-${rank}` : '';
+}
 
 // MOD PASSWORD — change this to your desired password
 const MOD_PASSWORD = 'cheesy';
@@ -6137,7 +6181,7 @@ function doPull(count) {
   results.forEach(r => pullHistory.unshift(r));
   if (pullHistory.length > 100) pullHistory = pullHistory.slice(0, 100);
   updateHistory();
-  if (results.some(r => r.rank === 'S')) {
+  if (pullAnimationEnabled && results.some(r => r.rank === 'S')) {
     const flash = document.createElement('div');
     flash.className = 's-rank-flash';
     document.body.appendChild(flash);
@@ -6151,8 +6195,8 @@ function doPull(count) {
 
 function showSingleResult(area, entry) {
   const c = RANK_COLORS[entry.rank];
-  area.innerHTML = `<div class="result-card" style="background:${c.card};border:1px solid ${c.border}40;">
-    <div class="result-card-shine"></div>
+  area.innerHTML = `<div class="result-card ${pullAnimationClass(entry.rank)}" style="background:${c.card};border:1px solid ${c.border}40;">
+    ${pullAnimationEnabled ? '<div class="result-card-shine"></div>' : ''}
     <div class="result-rank-badge" style="background:${c.badge}">${entry.rank} RANK — ${RANK_LABELS[entry.rank]}</div>
     <div class="result-type">${entry.type === 'power' ? '⚡ POWER / ABILITY' : '📦 ITEM'}</div>
     <div class="result-name" style="color:${c.accent}">${escHtml(entry.name)}</div>
@@ -6168,7 +6212,7 @@ function showMultiResult(area, results) {
   const bonus = results.length === 11 ? ' <span style="color:#fde68a">(+1 FREE)</span>' : '';
   const cards = sorted.map((entry, i) => {
     const c = RANK_COLORS[entry.rank];
-    return `<div class="multi-card" style="background:${c.card};border-color:${c.border}60;color:${c.accent};animation-delay:${i*0.05}s"
+    return `<div class="multi-card ${pullAnimationClass(entry.rank)}" style="background:${c.card};border-color:${c.border}60;color:${c.accent};animation-delay:${i*0.05}s"
       data-rank="${entry.rank}" data-name="${escAttrHtml(entry.name)}" data-desc="${escAttrHtml(entry.desc)}">
       <div class="multi-card-rank">${entry.rank}</div>
       <div class="multi-card-name">${escHtml(entry.name)}</div>
@@ -7586,6 +7630,18 @@ setInterval(() => {
 </div>
 </div>
 </div>
+<div class="rank-section">
+<div class="rank-header">
+<span class="rank-title">Pull Animation</span>
+</div>
+<div class="rank-content" style="display:grid;gap:14px;">
+<label class="form-label" style="margin-bottom:0;">Enable pull animation</label>
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+<input type="checkbox" id="pull-animation-toggle" onchange="setPullAnimation(this.checked)" />
+<span style="color:#94a3b8;font-size:13px;">Off by default. When enabled, rank results glow in their assigned colors.</span>
+</div>
+</div>
+</div>
 </div>
 </div>
 <script>
@@ -7607,6 +7663,7 @@ function updateThemeUI(active){
 document.addEventListener("DOMContentLoaded", ()=>{
   const saved = localStorage.getItem('theme') || 'gold';
   applyTheme(saved);
+  initPullSettings();
 });
 </script></body>
 </html>
