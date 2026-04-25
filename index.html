@@ -6657,6 +6657,46 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
   </div>
 </div>
 <script>
+// ==================== BANNING SYSTEM ====================
+const BANNED_ENTRIES_KEY = 'gacha-banned-entries';
+let bannedEntries = new Set();
+
+function loadBannedEntries() {
+  try {
+    const saved = localStorage.getItem(BANNED_ENTRIES_KEY);
+    if (saved) bannedEntries = new Set(JSON.parse(saved));
+  } catch (e) {
+    bannedEntries = new Set();
+  }
+}
+
+function saveBannedEntries() {
+  localStorage.setItem(BANNED_ENTRIES_KEY, JSON.stringify(Array.from(bannedEntries)));
+}
+
+function getBannedKey(entry) {
+  return `${entry.rank}|${entry.type}|${entry.name}`;
+}
+
+function toggleBan(entry) {
+  const key = getBannedKey(entry);
+  if (bannedEntries.has(key)) {
+    bannedEntries.delete(key);
+  } else {
+    bannedEntries.add(key);
+  }
+  saveBannedEntries();
+  if (typeof renderModTable === 'function') if(typeof renderModTable === 'function') renderModTable();
+  if (typeof rebuildBrowse === 'function') if(typeof rebuildBrowse === 'function') rebuildBrowse();
+  if (typeof updateBannedCounter === 'function') updateBannedCounter();
+}
+
+function isBanned(entry) {
+  return bannedEntries.has(getBannedKey(entry));
+}
+
+loadBannedEntries();
+
 const RANK_COLORS = {"S": {"accent": "#ffd700", "badge": "linear-gradient(135deg, #ffd700, #ff8c00)", "glow": "#ffd700", "card": "linear-gradient(135deg, #2a1500, #1a0a00)", "border": "#ffd700"}, "A": {"accent": "#c084fc", "badge": "linear-gradient(135deg, #c084fc, #7c3aed)", "glow": "#a855f7", "card": "linear-gradient(135deg, #1a0a2a, #0a0a1a)", "border": "#c084fc"}, "B": {"accent": "#34d399", "badge": "linear-gradient(135deg, #34d399, #059669)", "glow": "#10b981", "card": "linear-gradient(135deg, #002a14, #001a0a)", "border": "#34d399"}, "C": {"accent": "#60a5fa", "badge": "linear-gradient(135deg, #60a5fa, #2563eb)", "glow": "#3b82f6", "card": "linear-gradient(135deg, #001830, #001020)", "border": "#60a5fa"}, "D": {"accent": "#e879f9", "badge": "linear-gradient(135deg, #e879f9, #a21caf)", "glow": "#d946ef", "card": "linear-gradient(135deg, #200020, #100010)", "border": "#e879f9"}, "E": {"accent": "#fb923c", "badge": "linear-gradient(135deg, #fb923c, #c2410c)", "glow": "#f97316", "card": "linear-gradient(135deg, #201200, #100a00)", "border": "#fb923c"}, "F": {"accent": "#94a3b8", "badge": "linear-gradient(135deg, #94a3b8, #475569)", "glow": "#64748b", "card": "linear-gradient(135deg, #141414, #0a0a0a)", "border": "#94a3b8"}};
 const RANK_LABELS = {"S": "GOD-LIKE", "A": "DEMI-GOD", "B": "PEAK MORTAL", "C": "ELITE", "D": "ADVANCED", "E": "STANDARD", "F": "BASIC"};
 const RANKS = ['S','A','B','C','D','E','F'];
@@ -7003,42 +7043,7 @@ loadInventory();
   renderInventorySlots();
   updateBannedCounter();
 
-// ==================== BANNING SYSTEM ====================
-const BANNED_ENTRIES_KEY = 'gacha-banned-entries';
-let bannedEntries = new Set();
 
-function loadBannedEntries() {
-  try {
-    const saved = localStorage.getItem(BANNED_ENTRIES_KEY);
-    if (saved) bannedEntries = new Set(JSON.parse(saved));
-  } catch (e) {
-    bannedEntries = new Set();
-  }
-}
-
-function saveBannedEntries() {
-  localStorage.setItem(BANNED_ENTRIES_KEY, JSON.stringify(Array.from(bannedEntries)));
-}
-
-function getBannedKey(entry) {
-  return `${entry.rank}|${entry.type}|${entry.name}`;
-}
-
-function toggleBan(entry) {
-  const key = getBannedKey(entry);
-  if (bannedEntries.has(key)) {
-    bannedEntries.delete(key);
-  } else {
-    bannedEntries.add(key);
-  }
-  saveBannedEntries();
-}
-
-function isBanned(entry) {
-  return bannedEntries.has(getBannedKey(entry));
-}
-
-loadBannedEntries();
 
 let pullTypeFilter = 'all';
 
@@ -7115,8 +7120,8 @@ function clearAllBans() {
   if (!ok) return;
   bannedEntries.clear();
   saveBannedEntries();
-  renderModTable();
-  rebuildBrowse();
+  if(typeof renderModTable === 'function') renderModTable();
+  if(typeof rebuildBrowse === 'function') rebuildBrowse();
   updateBannedCounter();
   showToast('All bans cleared.', 'info');
 }
@@ -7241,7 +7246,7 @@ function modLogin() {
     modAuthenticated = true;
     document.getElementById('mod-gate').style.display = 'none';
     document.getElementById('mod-content').style.display = 'block';
-    renderModTable();
+    if(typeof renderModTable === 'function') renderModTable();
   } else {
     document.getElementById('mod-error').style.display = 'block';
     document.getElementById('mod-password').value = '';
@@ -7354,8 +7359,8 @@ function submitEntry() {
   }
   markUnsaved();
   closeFormModal();
-  renderModTable();
-  rebuildBrowse();
+  if(typeof renderModTable === 'function') renderModTable();
+  if(typeof rebuildBrowse === 'function') rebuildBrowse();
 }
 
 async function deleteEntry(idx) {
@@ -7364,15 +7369,15 @@ async function deleteEntry(idx) {
   entries.splice(idx, 1);
   markUnsaved();
   showToast('Entry deleted.', 'warn');
-  renderModTable();
-  rebuildBrowse();
+  if(typeof renderModTable === 'function') renderModTable();
+  if(typeof rebuildBrowse === 'function') rebuildBrowse();
 }
 
 // ==================== BAN ENTRY FUNCTION ====================
 function toggleBanEntry(idx) {
   const entry = entries[idx];
   toggleBan(entry);
-  renderModTable();
+  if(typeof renderModTable === 'function') renderModTable();
   showToast(isBanned(entry) ? 'Entry banned.' : 'Entry unbanned.', 'info');
 }
 
@@ -7621,8 +7626,8 @@ async function gistLoad() {
       if (!e.rank || !e.type || !e.name || !e.desc) throw new Error('Invalid entry structure');
     }
     entries = loaded;
-    rebuildBrowse();
-    renderModTable();
+    if(typeof rebuildBrowse === 'function') rebuildBrowse();
+    if(typeof renderModTable === 'function') renderModTable();
     try {
       localStorage.setItem('gist-id', document.getElementById('gist-id-input').value);
       localStorage.setItem('gist-file', filename);
@@ -7737,7 +7742,7 @@ async function gistSave() {
               const loaded = Array.isArray(data) ? data : (data.entries || []);
               if (Array.isArray(loaded)) {
                 entries = loaded;
-                rebuildBrowse();
+                if(typeof rebuildBrowse === 'function') rebuildBrowse();
               }
             }
           }
@@ -7802,8 +7807,8 @@ async function restoreEntries() {
     if (ok) {
       entries = backup.data;
       markUnsaved();
-      rebuildBrowse();
-      renderModTable();
+      if(typeof rebuildBrowse === 'function') rebuildBrowse();
+      if(typeof renderModTable === 'function') renderModTable();
       showToast('Restored from backup (' + entries.length + ' entries)', 'success');
     }
   } catch (e) {
@@ -7913,7 +7918,7 @@ setInterval(() => {
       const autosave = JSON.parse(localStorage.getItem('entries-autosave'));
       if (autosave && Array.isArray(autosave) && autosave.length > 0) {
         entries = autosave;
-        rebuildBrowse();
+        if(typeof rebuildBrowse === 'function') rebuildBrowse();
       }
     } catch (e) { /* silent */ }
   }
@@ -7930,8 +7935,8 @@ setInterval(() => {
     const loaded = Array.isArray(data) ? data : (data.entries || []);
     if (Array.isArray(loaded) && loaded.length > 0) {
       entries = loaded;
-      rebuildBrowse();
-      renderModTable();
+      if(typeof rebuildBrowse === 'function') rebuildBrowse();
+      if(typeof renderModTable === 'function') renderModTable();
       gistMsg('✅ Auto-loaded ' + loaded.length + ' entries from Gist');
     }
   } catch (e) {
@@ -8478,8 +8483,8 @@ setInterval(() => {
         entries.push({ rank: entry.rank, type: entry.type, name: entry.name, desc: entry.desc });
         added += 1;
       });
-      rebuildBrowse();
-      renderModTable();
+      if(typeof rebuildBrowse === 'function') rebuildBrowse();
+      if(typeof renderModTable === 'function') renderModTable();
       gistMsg('Merge complete: ' + added + ' added, ' + skipped + ' skipped as duplicates.');
     } catch (err) {
       gistMsg('Error: ' + err.message, true);
@@ -9021,12 +9026,7 @@ function playP5RSound(type) {
 const VAULT_KEY = 'gacha-vault';
 let vault = {};
 
-function loadVault() {
-  const saved = localStorage.getItem(VAULT_KEY);
-  if (saved) {
-    try {
-      vault = JSON.parse(saved);
-    } catch (e) {
+ catch (e) {
       console.error('Failed to load vault:', e);
       vault = {};
     }
@@ -9055,23 +9055,7 @@ function addToVault(entry) {
   saveVault();
 }
 
-function updateVaultDisplay() {
-  const grid = document.getElementById('vault-grid');
-  const empty = document.getElementById('vault-empty');
-  const rankFilter = document.getElementById('vault-rank-filter')?.value || '';
-  const typeFilter = document.getElementById('vault-type-filter')?.value || '';
-  
-  if (!grid) return;
-  
-  let items = Object.values(vault);
-  if (rankFilter) items = items.filter(i => i.rank === rankFilter);
-  if (typeFilter) items = items.filter(i => i.type === typeFilter);
-  
-  if (items.length === 0) {
-    grid.style.display = 'none';
-    empty.style.display = 'block';
-    return;
-  }
+
   
   grid.style.display = 'grid';
   empty.style.display = 'none';
@@ -9080,12 +9064,9 @@ function updateVaultDisplay() {
   grid.innerHTML = items.map(item => `<div class="vault-item" style="border-color: ${colors[item.rank]}80;"><div class="vault-item-rank" style="color: ${colors[item.rank]}">${item.rank}</div><div class="vault-item-name">${item.name}</div><div class="vault-item-count">×${item.count}</div></div>`).join('');
 }
 
-async function clearVault() {
-  const ok = await showConfirm('Clear entire vault? This cannot be undone.', 'Clear Vault', 'Keep');
-  if (ok) {
-    vault = {};
+async ;
     localStorage.removeItem(VAULT_KEY);
-    updateVaultDisplay();
+    
     showToast('Vault cleared.', 'warn');
   }
 }
@@ -9276,7 +9257,7 @@ function importProfile() {
         saveVault();
         saveWishlist();
         updateRatesDisplay();
-        updateVaultDisplay();
+        
         updateWishlistDisplay();
         showToast('Profile imported successfully!', 'success');
       } catch (error) {
@@ -9388,39 +9369,35 @@ window.addEventListener('beforeunload', e => {
   if (unsavedChanges) { e.preventDefault(); e.returnValue = ''; }
 });
 
+
 document.addEventListener("DOMContentLoaded", () => {
+  // Core initialization
+  loadBannedEntries();
+  loadInventory();
+  loadSlotNames();
+  loadPityCounter();
+  loadWishlist();
+  
+  // UI initialization
   initPullSettings();
   updateRatesDisplay();
   loadRatesToEditor();
-  loadVault();
-  loadWishlist();
   initFloatingShards();
   initBGM();
-  updateVaultDisplay();
   updateWishlistDisplay();
+  renderInventorySlots();
+  renderInventory();
+  updateBannedCounter();
   
-  // Initialize pity and inventory
-  loadPityCounter();
-  loadInventory();
-  loadBannedEntries();
-  
-  // Set pity toggle
+  // Pity UI
   const pityToggle = document.getElementById('pity-toggle');
   if (pityToggle) pityToggle.checked = pityEnabled;
   updatePityDisplay();
   
+  // Event listeners
   document.querySelectorAll('.pull-btn').forEach(btn => {
     btn.addEventListener('click', () => playP5RSound('click'));
-  
-  // Render inventory and update banned counter
-  renderInventory();
-  updateInventorySlotButtons();
-  
-  const bannedCountDisplay = document.getElementById('banned-count-display');
-  if (bannedCountDisplay) {
-    bannedCountDisplay.textContent = bannedEntries.size;
-  }
-});
+  });
   
   document.querySelectorAll('button').forEach(btn => {
     btn.addEventListener('mouseenter', playHoverSound);
@@ -9432,6 +9409,19 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+  
+  document.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('mouseenter', playHoverSound);
+  });
+  
+  if (document.body.dataset.theme === 'personaMode') {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => playP5RSound('shing'));
+    });
+  }
+});
+
 
 // ==================== PITY DISPLAY UPDATE ====================
 function updatePityDisplay() {
@@ -9467,14 +9457,6 @@ function renderInventory() {
   `).join('');
 }
 
-// ==================== SWITCH INVENTORY SLOT ====================
-function switchInventorySlot(slot) {
-  currentInventorySlot = slot;
-  saveInventory();
-  renderInventory();
-  updateInventorySlotButtons();
-}
-
 function updateInventorySlotButtons() {
   document.querySelectorAll('.inventory-slot-btn').forEach((btn, i) => {
     if (i === currentInventorySlot) {
@@ -9489,5 +9471,47 @@ function updateInventorySlotButtons() {
   });
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+  // Core data initialization
+  loadBannedEntries();
+  loadInventory();
+  loadSlotNames();
+  loadPityCounter();
+  loadWishlist();
+  
+  // UI initialization
+  initPullSettings();
+  updateRatesDisplay();
+  loadRatesToEditor();
+  initFloatingShards();
+  initBGM();
+  updateWishlistDisplay();
+  
+  // Render inventory components
+  if (typeof renderInventorySlots === 'function') renderInventorySlots();
+  renderInventory();
+  updateInventorySlotButtons();
+  if (typeof updateBannedCounter === 'function') updateBannedCounter();
+  
+  // Pity UI
+  const pityToggle = document.getElementById('pity-toggle');
+  if (pityToggle) pityToggle.checked = pityEnabled;
+  updatePityDisplay();
+  
+  // Event listeners
+  document.querySelectorAll('.pull-btn').forEach(btn => {
+    btn.addEventListener('click', () => playP5RSound('click'));
+  });
+  
+  document.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('mouseenter', playHoverSound);
+  });
+  
+  if (document.body.dataset.theme === 'personaMode') {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => playP5RSound('shing'));
+    });
+  }
+});
 </script></body>
 </html>
