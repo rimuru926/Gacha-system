@@ -779,6 +779,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 <button class="tab-btn" onclick="switchTab('vault', this)">🏆 VAULT</button>
 <button class="tab-btn" onclick="switchTab('wishlist', this)">⭐ WISHLIST</button>
 <button class="tab-btn" onclick="switchTab('mod', this)">⚙️ MOD</button>
+<button class="tab-btn" onclick="switchTab('inventory', this)">📦 INVENTORY</button>
 <button class="tab-btn" onclick="switchTab('settings', this)">⚙ SETTINGS</button>
 </div>
 <!-- PULL TAB -->
@@ -787,6 +788,11 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 <div class="gacha-title">— Make Your Pull —</div>
 <div class="rates-display" id="rates-display">
 <!-- Dynamically populated by updateRatesDisplay() -->
+</div>
+<div style="display:flex; gap:8px; justify-content:center; margin-bottom:20px;">
+  <button id="pf-all" onclick="setPullFilter('all')" style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:0.15em;padding:7px 18px;border-radius:20px;border:1px solid rgba(255,215,0,0.6);background:rgba(255,215,0,0.15);color:#ffd700;cursor:pointer;transition:all 0.2s;">ALL</button>
+  <button id="pf-power" onclick="setPullFilter('power')" style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:0.15em;padding:7px 18px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:var(--text-dim);cursor:pointer;transition:all 0.2s;">⚡ POWERS</button>
+  <button id="pf-item" onclick="setPullFilter('item')" style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:0.15em;padding:7px 18px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:var(--text-dim);cursor:pointer;transition:all 0.2s;">📦 ITEMS</button>
 </div>
 <div class="pull-buttons">
 <button class="pull-btn pull-btn-single" onclick="doPull(1)">
@@ -6650,6 +6656,14 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 <label class="form-label">DESCRIPTION</label>
 <textarea class="form-textarea" id="form-desc" placeholder="Entry description..."></textarea>
 </div>
+<div class="form-row">
+<label class="form-label">EVOLUTION (Optional)</label>
+<input class="form-input" id="form-evo" placeholder="Name of evolved form (if this has a duplicate upgrade)..." type="text"/>
+</div>
+<div class="form-row">
+<label class="form-label">PRE-EVOLUTION (Optional)</label>
+<input class="form-input" id="form-preevo" placeholder="Name of base form (if this is an evolution)..." type="text"/>
+</div>
 <button class="form-submit" onclick="submitEntry()">SAVE ENTRY</button>
 </div>
 </div>
@@ -6757,20 +6771,223 @@ function resetRates() {
 
 loadCustomRates();
 
-function pickRank() {
-  const r = Math.random() * 100;
-  let cum = 0;
-  for (const rate of RATES) {
-    cum += rate.weight;
-    if (r < cum) return rate.rank;
+// ==================== PITY SYSTEM ====================
+const PITY_KEY = 'gacha-pity-enabled';
+const PITY_COUNTER_KEY = 'gacha-pity-counter';
+let pityEnabled = localStorage.getItem(PITY_KEY) === 'true';
+let pityCounter = 0;
+
+function loadPityCounter() {
+  try {
+    pityCounter = parseInt(localStorage.getItem(PITY_COUNTER_KEY)) || 0;
+  } catch (e) {
+    pityCounter = 0;
   }
-  return 'F';
 }
 
-function pickEntry(rank) {
-  const pool = entries.filter(e => e.rank === rank);
-  if (!pool.length) return { rank, type: 'power', name: 'Empty Pool', desc: 'No entries for this rank yet.' };
-  return pool[Math.floor(Math.random() * pool.length)];
+function savePityCounter() {
+  localStorage.setItem(PITY_COUNTER_KEY, pityCounter.toString());
+}
+
+function setPityEnabled(enabled) {
+  pityEnabled = enabled;
+  localStorage.setItem(PITY_KEY, enabled.toString());
+}
+
+loadPityCounter();
+
+// ==================== EVOLUTION & INVENTORY SYSTEM ====================
+const INVENTORY_KEY = 'gacha-inventory';
+const INVENTORY_SLOTS_KEY = 'gacha-inventory-slots';
+let currentInventorySlot = 0;
+let inventorySlots = {};
+
+function loadInventory() {
+  try {
+    const saved = localStorage.getItem(INVENTORY_KEY);
+    if (saved) inventorySlots = JSON.parse(saved);
+  } catch (e) {
+    inventorySlots = {};
+  }
+  if (!inventorySlots['slot-0']) inventorySlots['slot-0'] = {};
+}
+
+function saveInventory() {
+  localStorage.setItem(INVENTORY_KEY, JSON.stringify(inventorySlots));
+}
+
+function getCurrentInventory() {
+  const key = `slot-${currentInventorySlot}`;
+  if (!inventorySlots[key]) inventorySlots[key] = {};
+  return inventorySlots[key];
+}
+
+
+// ==================== AUTO-EVOLUTION MAPPING ====================
+function getAutomaticEvolution(name) {
+  const chains = {
+    "Killer Queen": "Killer Queen: Bites the Dust",
+    "One For All": "One For All (Previous Users' Quirks)",
+    "Soft & Wet": "Soft & Wet: Go Beyond",
+    
+    // Judo
+    "Judo Grimoire — Blue Belt": "Judo Grimoire — 1st Dan Black Belt (Shodan)",
+    "Judo Grimoire — 1st Dan Black Belt (Shodan)": "Judo Grimoire — 5th Dan Black Belt (Godan)",
+    "Judo Grimoire — 5th Dan Black Belt (Godan)": "Judo Grimoire — 10th Dan Red Belt (Judan)",
+    
+    // BJJ
+    "Brazilian Jiu-Jitsu Grimoire — Purple Belt (2 Stripe)": "Brazilian Jiu-Jitsu Grimoire — 1st Degree Black Belt",
+    "Brazilian Jiu-Jitsu Grimoire — 1st Degree Black Belt": "Brazilian Jiu-Jitsu Grimoire — 6th Degree Black Belt",
+    "Brazilian Jiu-Jitsu Grimoire — 6th Degree Black Belt": "Brazilian Jiu-Jitsu Grimoire — 9th Degree Red Belt (Grandmaster)",
+    
+    // Taekwondo
+    "Taekwondo Grimoire — Blue Belt (4th Geup)": "Taekwondo Grimoire — 1st Dan Black Belt (Il Dan)",
+    "Taekwondo Grimoire — 1st Dan Black Belt (Il Dan)": "Taekwondo Grimoire — 5th Dan Black Belt (O Dan)",
+    "Taekwondo Grimoire — 5th Dan Black Belt (O Dan)": "Taekwondo Grimoire — 9th Dan Black Belt (Grandmaster)",
+    
+    // Kenjutsu
+    "Kenjutsu Grimoire — Kirigami": "Kenjutsu Grimoire — Mokuroku",
+    "Kenjutsu Grimoire — Mokuroku": "Kenjutsu Grimoire — Menkyo",
+    "Kenjutsu Grimoire — Menkyo": "Kenjutsu Grimoire — Menkyo Kaiden",
+    
+    // Sojutsu
+    "Sojutsu Grimoire — Kirigami": "Sojutsu Grimoire — Mokuroku",
+    "Sojutsu Grimoire — Mokuroku": "Sojutsu Grimoire — Menkyo",
+    "Sojutsu Grimoire — Menkyo": "Sojutsu Grimoire — Menkyo Kaiden"
+  };
+  return chains[name] || null;
+}
+
+function addToInventory(entry) {
+  const inv = getCurrentInventory();
+  const key = `${entry.rank}|${entry.type}|${entry.name}`;
+  
+  // Determine if this entry should evolve
+  const evoName = entry.evo || getAutomaticEvolution(entry.name);
+  
+  // If we already have it, and it can evolve, upgrade it
+  if (inv[key] && evoName) {
+    const evolvedEntry = entries.find(e => e.name === evoName);
+    if (evolvedEntry) {
+      delete inv[key];
+      showToast(`Evolution! ${entry.name} upgraded to ${evoName}`, 'success');
+      addToInventory(evolvedEntry);
+      return;
+    }
+  }
+  
+  // Otherwise, just increment the count
+  inv[key] = (inv[key] || 0) + 1;
+  saveInventory();
+  if (typeof renderInventory === 'function') renderInventory();
+}
+
+loadInventory();
+
+// ==================== BANNING SYSTEM ====================
+const BANNED_ENTRIES_KEY = 'gacha-banned-entries';
+let bannedEntries = new Set();
+
+function loadBannedEntries() {
+  try {
+    const saved = localStorage.getItem(BANNED_ENTRIES_KEY);
+    if (saved) bannedEntries = new Set(JSON.parse(saved));
+  } catch (e) {
+    bannedEntries = new Set();
+  }
+}
+
+function saveBannedEntries() {
+  localStorage.setItem(BANNED_ENTRIES_KEY, JSON.stringify(Array.from(bannedEntries)));
+}
+
+function getBannedKey(entry) {
+  return `${entry.rank}|${entry.type}|${entry.name}`;
+}
+
+function toggleBan(entry) {
+  const key = getBannedKey(entry);
+  if (bannedEntries.has(key)) {
+    bannedEntries.delete(key);
+  } else {
+    bannedEntries.add(key);
+  }
+  saveBannedEntries();
+}
+
+function isBanned(entry) {
+  return bannedEntries.has(getBannedKey(entry));
+}
+
+loadBannedEntries();
+
+let pullTypeFilter = 'all';
+
+function setPullFilter(f) {
+  pullTypeFilter = f;
+  const on  = ';border:1px solid rgba(255,215,0,0.6);background:rgba(255,215,0,0.15);color:#ffd700;';
+  const off = ';border:1px solid rgba(255,255,255,0.1);background:transparent;color:var(--text-dim);';
+  ['all','power','item'].forEach(id => {
+    const btn = document.getElementById('pf-' + id);
+    if (btn) btn.style.cssText = btn.style.cssText.replace(/;border:[^;]+;background:[^;]+;color:[^;]+;/, f === id ? on : off);
+  });
+}
+
+// Picks one entry using per-entry weights derived from rank rates.
+// Each entry's weight = rank_rate / number_of_entries_of_that_rank_in_the_active_pool.
+// If a rank has no entries in the pool (e.g. no S items when filter='item'), it contributes 0 weight.
+// Supports pity system: if pityEnabled and pityCounter >= 75, guarantees B rank or better.
+function pickWeightedEntry(forcePity = false) {
+  let pool = pullTypeFilter === 'all' ? entries : entries.filter(e => e.type === pullTypeFilter);
+  // Filter out banned entries
+  pool = pool.filter(e => !isBanned(e));
+  if (!pool.length) return { rank: 'F', type: pullTypeFilter === 'item' ? 'item' : 'power', name: 'No entries available', desc: 'No entries match the current filter.' };
+
+  // Pity system: if enabled and counter >= 75, force B rank or better
+  if (forcePity && pityEnabled && pityCounter >= 75) {
+    const guaranteedPool = pool.filter(e => ['S', 'A', 'B'].includes(e.rank));
+    if (guaranteedPool.length > 0) {
+      const rankCounts = {};
+      for (const e of guaranteedPool) rankCounts[e.rank] = (rankCounts[e.rank] || 0) + 1;
+      const rateMap = {};
+      for (const r of RATES) rateMap[r.rank] = r.weight;
+      let total = 0;
+      const weighted = guaranteedPool.map(e => {
+        const w = (rateMap[e.rank] || 0) / rankCounts[e.rank];
+        total += w;
+        return { entry: e, w };
+      });
+      let rand = Math.random() * total;
+      for (const { entry, w } of weighted) {
+        rand -= w;
+        if (rand <= 0) return entry;
+      }
+      return weighted[weighted.length - 1].entry;
+    }
+  }
+
+  // Count entries per rank within the pool
+  const rankCounts = {};
+  for (const e of pool) rankCounts[e.rank] = (rankCounts[e.rank] || 0) + 1;
+
+  // Map rank → its configured weight (rate)
+  const rateMap = {};
+  for (const r of RATES) rateMap[r.rank] = r.weight;
+
+  // Each entry's individual weight = rank_rate / count_of_that_rank_in_pool
+  let total = 0;
+  const weighted = pool.map(e => {
+    const w = (rateMap[e.rank] || 0) / rankCounts[e.rank];
+    total += w;
+    return { entry: e, w };
+  });
+
+  let r = Math.random() * total;
+  for (const { entry, w } of weighted) {
+    r -= w;
+    if (r <= 0) return entry;
+  }
+  return weighted[weighted.length - 1].entry;
 }
 
 function doPull(count) {
@@ -6778,8 +6995,26 @@ function doPull(count) {
   btns.forEach(b => b.disabled = true);
   const actual = count === 10 ? 11 : count;
   const results = [];
-  for (let i = 0; i < actual; i++) { results.push(pickEntry(pickRank())); }
-  results.forEach(r => pullHistory.unshift(r));
+  for (let i = 0; i < actual; i++) {
+    const usePity = (i === actual - 1) && pityEnabled;
+    results.push(pickWeightedEntry(usePity));
+  }
+  
+  if (pityEnabled) {
+    results.forEach(r => {
+      if (['S', 'A', 'B'].includes(r.rank)) {
+        pityCounter = 0;
+      } else {
+        pityCounter++;
+      }
+    });
+    savePityCounter();
+  }
+  
+  results.forEach(r => {
+    pullHistory.unshift(r);
+    addToInventory(r);
+  });
   if (pullHistory.length > 100) pullHistory = pullHistory.slice(0, 100);
   updateHistory();
   if (pullAnimationEnabled && results.some(r => r.rank === 'S')) {
@@ -6890,14 +7125,17 @@ function renderModTable() {
     const typeLabel = e.type === 'power' ? '⚡ Power' : '📦 Item';
     const typeColor = e.type === 'power' ? 'rgba(147,197,253,0.15)' : 'rgba(251,191,36,0.15)';
     const typeText = e.type === 'power' ? '#93c5fd' : '#fbbf24';
-    return `<tr>
+    const isBannedEntry = isBanned(e);
+    const evoInfo = e.evo ? `<div style="font-size:10px;color:#94a3b8;margin-top:4px;">→ ${escHtml(e.evo)}</div>` : '';
+    return `<tr style="${isBannedEntry ? 'opacity:0.5;' : ''}">
       <td><span class="mod-rank-pill" style="background:${c.badge}">${e.rank}</span>
           <br><span class="mod-type-pill" style="background:${typeColor};color:${typeText}">${typeLabel}</span></td>
-      <td><div class="mod-entry-name">${escHtml(e.name)}</div></td>
+      <td><div class="mod-entry-name">${escHtml(e.name)}</div>${evoInfo}</td>
       <td><div class="mod-entry-desc">${escHtml(e.desc)}</div></td>
       <td><div class="mod-action-btns">
         <button class="mod-edit-btn" onclick="openEntryForm(${e._idx})">EDIT</button>
         <button class="mod-delete-btn" onclick="deleteEntry(${e._idx})">DELETE</button>
+        <button class="mod-ban-btn" onclick="toggleBanEntry(${e._idx})" style="background:${isBannedEntry ? 'rgba(239,68,68,0.3)' : 'rgba(100,116,139,0.2)'};color:${isBannedEntry ? '#ef4444' : '#94a3b8'};border:1px solid ${isBannedEntry ? 'rgba(239,68,68,0.5)' : 'rgba(100,116,139,0.4)'};padding:6px 12px;border-radius:4px;cursor:pointer;font-family:'Cinzel',serif;font-size:10px;font-weight:700;transition:all 0.2s;">${isBannedEntry ? '🚫 BANNED' : '🔒 BAN'}</button>
       </div></td>
     </tr>`;
   }).join('');
@@ -6913,11 +7151,15 @@ function openEntryForm(idx) {
     document.getElementById('form-type').value = e.type;
     document.getElementById('form-name').value = e.name;
     document.getElementById('form-desc').value = e.desc;
+    document.getElementById('form-evo').value = e.evo || '';
+    document.getElementById('form-preevo').value = e.preevo || '';
   } else {
     document.getElementById('form-rank').value = 'D';
     document.getElementById('form-type').value = 'power';
     document.getElementById('form-name').value = '';
     document.getElementById('form-desc').value = '';
+    document.getElementById('form-evo').value = '';
+    document.getElementById('form-preevo').value = '';
   }
   document.getElementById('form-modal').classList.add('open');
 }
@@ -6933,10 +7175,24 @@ function submitEntry() {
   const type = document.getElementById('form-type').value;
   const name = document.getElementById('form-name').value.trim();
   const desc = document.getElementById('form-desc').value.trim();
+  const evo = document.getElementById('form-evo').value.trim();
+  const preevo = document.getElementById('form-preevo').value.trim();
   if (!name || !desc) { showToast('Name and description are required.', 'error'); return; }
   if (!RANKS.includes(rank)) { showToast('Invalid rank selected.', 'error'); return; }
   if (!['power', 'item'].includes(type)) { showToast('Invalid type selected.', 'error'); return; }
   const entry = { rank, type, name, desc };
+  if (evo) entry.evo = evo;
+  if (preevo) entry.preevo = preevo;
+  
+  // Bidirectional link: if preevo is specified, find it and set its 'evo' to this new entry
+  if (preevo) {
+    const baseEntry = entries.find(e => e.name === preevo);
+    if (baseEntry) {
+      baseEntry.evo = name;
+      showToast(`Linked: ${preevo} now evolves into ${name}`, 'info');
+    }
+  }
+
   if (editingIndex !== null) {
     entries[editingIndex] = entry;
     showToast('Entry updated.', 'success');
@@ -6958,6 +7214,14 @@ async function deleteEntry(idx) {
   showToast('Entry deleted.', 'warn');
   renderModTable();
   rebuildBrowse();
+}
+
+// ==================== BAN ENTRY FUNCTION ====================
+function toggleBanEntry(idx) {
+  const entry = entries[idx];
+  toggleBan(entry);
+  renderModTable();
+  showToast(isBanned(entry) ? 'Entry banned.' : 'Entry unbanned.', 'info');
 }
 
 // ==================== BROWSE REBUILD ====================
@@ -7770,23 +8034,32 @@ setInterval(() => {
       const colors = RANK_COLORS[entry.rank] || { accent: '#fff', card: 'var(--surface)', border: 'rgba(255,255,255,0.1)' };
       const count = getCollectedCount(entry);
       const collected = count > 0;
+      const banned = isBanned(entry);
       const safeName = collected ? escHtml(entry.name) : 'Unknown ' + entry.rank + '-Rank ' + (entry.type === 'power' ? 'Power' : 'Item');
       const safeDesc = collected ? escHtml(entry.desc) : 'This entry is still missing from your archive. Pull it to reveal its full details and description.';
+      const borderColor = banned ? 'rgba(239,68,68,0.5)' : colors.border + '55';
+      const bgColor = banned ? 'linear-gradient(180deg, rgba(30,10,10,0.9), rgba(15,5,5,0.95))' : (collected ? colors.card : 'linear-gradient(180deg, rgba(22,22,34,0.92), rgba(8,8,12,0.98))');
+      const textColor = banned ? '#ef4444' : colors.accent;
       return `
-        <article class="collection-card ${collected ? 'collected' : 'locked'}" data-collection-key="${escAttr(entryKey(entry))}" data-rank="${escAttr(entry.rank)}" data-name="${escAttr(entry.name)}" data-desc="${escAttr(entry.desc)}" style="border-color:${colors.border}55;background:${collected ? colors.card : 'linear-gradient(180deg, rgba(22,22,34,0.92), rgba(8,8,12,0.98))'};color:${colors.accent}">
-          <div class="collection-rank-badge" style="background:${collected ? colors.accent : 'rgba(148,163,184,0.18)'};color:${collected ? '#0b1020' : '#cbd5e1'}">
+        <article class="collection-card ${collected ? 'collected' : 'locked'} ${banned ? 'banned' : ''}" data-collection-key="${escAttr(entryKey(entry))}" data-rank="${escAttr(entry.rank)}" data-name="${escAttr(entry.name)}" data-desc="${escAttr(entry.desc)}" style="border-color:${borderColor};background:${bgColor};color:${textColor};${banned ? 'opacity:0.6;' : ''}">
+          <div class="collection-rank-badge" style="background:${banned ? 'rgba(239,68,68,0.3)' : (collected ? colors.accent : 'rgba(148,163,184,0.18)')};color:${banned ? '#ef4444' : (collected ? '#0b1020' : '#cbd5e1')}">
             ${entry.rank}
             <span class="collection-type-pill">${entry.type === 'power' ? 'POWER' : 'ITEM'}</span>
           </div>
           ${collected ? `<div class="collection-count">PULLED ×${count}</div>` : ''}
+          ${banned ? '<div style="position: absolute; top: 8px; right: 8px; font-size: 16px;">🚫</div>' : ''}
           <div class="collection-name">${safeName}</div>
           <div class="collection-desc">${safeDesc}</div>
         </article>
       `;
     }).join('');
 
-    grid.querySelectorAll('.collection-card.collected').forEach(card => {
-      card.addEventListener('click', () => openModal(card.dataset.rank, card.dataset.name, card.dataset.desc));
+    grid.querySelectorAll('.collection-card').forEach(card => {
+      card.addEventListener('click', () => {
+        if (card.classList.contains('collected')) {
+          openModal(card.dataset.rank, card.dataset.name, card.dataset.desc);
+        }
+      });
     });
   }
 
@@ -7823,7 +8096,7 @@ setInterval(() => {
     const results = [];
     
     // Simple pull without animation
-    for (let i = 0; i < actual; i++) results.push(pickEntry(pickRank()));
+    for (let i = 0; i < actual; i++) results.push(pickWeightedEntry());
 
     results.forEach(r => {
       pullHistory.unshift(r);
@@ -8229,6 +8502,54 @@ setInterval(() => {
     }
 })();
 </script>
+<div class="tab-content" id="tab-inventory">
+<div class="mod-panel" style="max-width: 1200px; margin: 0 auto;">
+<div class="mod-panel-header">
+<div class="mod-panel-title">INVENTORY</div>
+</div>
+
+<div class="rank-section">
+<div class="rank-header">
+<span class="rank-title">Inventory Slots</span>
+</div>
+<div class="rank-content" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;">
+<button class="inventory-slot-btn" onclick="switchInventorySlot(0)" style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: transparent; color: var(--text-dim); cursor: pointer; font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; transition: all 0.2s;">SLOT 1</button>
+<button class="inventory-slot-btn" onclick="switchInventorySlot(1)" style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: transparent; color: var(--text-dim); cursor: pointer; font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; transition: all 0.2s;">SLOT 2</button>
+<button class="inventory-slot-btn" onclick="switchInventorySlot(2)" style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: transparent; color: var(--text-dim); cursor: pointer; font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; transition: all 0.2s;">SLOT 3</button>
+<button class="inventory-slot-btn" onclick="switchInventorySlot(3)" style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: transparent; color: var(--text-dim); cursor: pointer; font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; transition: all 0.2s;">SLOT 4</button>
+<button class="inventory-slot-btn" onclick="switchInventorySlot(4)" style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: transparent; color: var(--text-dim); cursor: pointer; font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; transition: all 0.2s;">SLOT 5</button>
+</div>
+</div>
+
+<div class="rank-section">
+<div class="rank-header">
+<span class="rank-title">Pulled Items</span>
+</div>
+<div class="rank-content">
+<div id="inventory-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; margin-top: 16px;">
+<!-- Inventory items will render here -->
+</div>
+</div>
+</div>
+
+<div class="rank-section">
+<div class="rank-header">
+<span class="rank-title">Banned Items Counter</span>
+</div>
+<div class="rank-content">
+<div style="padding: 12px; background: rgba(255,255,255,0.05); border-radius: 6px; border-left: 3px solid rgba(239,68,68,0.5);">
+<div style="color: var(--text); font-size: 13px; font-weight: 700;">
+🚫 <span id="banned-count-display">0</span> items banned from pulls
+</div>
+<div style="color: var(--text-dim); font-size: 11px; margin-top: 6px;">
+Banned items will not appear in pulls. Click entries in MOD tab to ban/unban.
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
 <div class="tab-content" id="tab-settings">
 <div class="mod-panel">
 <div class="mod-panel-header">
@@ -8340,6 +8661,25 @@ setInterval(() => {
 <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
 <input type="checkbox" id="pull-animation-toggle" onchange="setPullAnimation(this.checked)" />
 <span style="color:#94a3b8;font-size:13px;">Off by default. When enabled, rank results glow in their assigned colors.</span>
+</div>
+</div>
+</div>
+
+<div class="rank-section">
+<div class="rank-header">
+<span class="rank-title">Pity System</span>
+</div>
+<div class="rank-content" style="display:grid;gap:14px;">
+<label class="form-label" style="margin-bottom:0;">Enable Pity System</label>
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+<input type="checkbox" id="pity-toggle" onchange="setPityEnabled(this.checked)" />
+<span style="color:#94a3b8;font-size:13px;">Off by default. When enabled, guarantees B rank or better at pull 75. Pulls 1-74 remain pure RNG.</span>
+</div>
+<div style="margin-top:12px;padding:12px;background:rgba(255,255,255,0.05);border-radius:6px;border-left:3px solid rgba(52,211,153,0.5);">
+<div style="color:var(--text-dim);font-size:11px;line-height:1.6;">
+<strong>Pity Counter:</strong> <span id="pity-counter-display">0 / 75</span><br/>
+<strong>Note:</strong> Counter resets when you pull B rank or better. Preserves true randomness for first 74 pulls.
+</div>
 </div>
 </div>
 </div>
@@ -8892,9 +9232,28 @@ document.addEventListener("DOMContentLoaded", () => {
   updateVaultDisplay();
   updateWishlistDisplay();
   
+  // Initialize pity and inventory
+  loadPityCounter();
+  loadInventory();
+  loadBannedEntries();
+  
+  // Set pity toggle
+  const pityToggle = document.getElementById('pity-toggle');
+  if (pityToggle) pityToggle.checked = pityEnabled;
+  updatePityDisplay();
+  
   document.querySelectorAll('.pull-btn').forEach(btn => {
     btn.addEventListener('click', () => playP5RSound('click'));
-  });
+  
+  // Render inventory and update banned counter
+  renderInventory();
+  updateInventorySlotButtons();
+  
+  const bannedCountDisplay = document.getElementById('banned-count-display');
+  if (bannedCountDisplay) {
+    bannedCountDisplay.textContent = bannedEntries.size;
+  }
+});
   
   document.querySelectorAll('button').forEach(btn => {
     btn.addEventListener('mouseenter', playHoverSound);
@@ -8906,5 +9265,62 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+// ==================== PITY DISPLAY UPDATE ====================
+function updatePityDisplay() {
+  const display = document.getElementById('pity-counter-display');
+  if (display) {
+    display.textContent = pityCounter + ' / 75';
+  }
+}
+
+// ==================== INVENTORY DISPLAY ====================
+function renderInventory() {
+  const container = document.getElementById('inventory-grid');
+  if (!container) return;
+  
+  const inv = getCurrentInventory();
+  const items = Object.entries(inv).map(([key, count]) => {
+    const [rank, type, name] = key.split('|');
+    return { rank, type, name, count };
+  });
+  
+  if (items.length === 0) {
+    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-dim); padding: 40px;">Your inventory is empty. Pull to add items!</div>';
+    return;
+  }
+  
+  const colors = {S: '#ffd700', A: '#c084fc', B: '#34d399', C: '#60a5fa', D: '#e879f9', E: '#fb923c', F: '#94a3b8'};
+  container.innerHTML = items.map(item => `
+    <div style="background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center;">
+      <div style="font-size: 14px; font-weight: 700; color: ${colors[item.rank]}; margin-bottom: 6px;">${item.rank}</div>
+      <div style="font-size: 12px; color: var(--text); margin-bottom: 4px;">${item.name}</div>
+      <div style="font-size: 11px; color: var(--text-dim);">×${item.count}</div>
+    </div>
+  `).join('');
+}
+
+// ==================== SWITCH INVENTORY SLOT ====================
+function switchInventorySlot(slot) {
+  currentInventorySlot = slot;
+  saveInventory();
+  renderInventory();
+  updateInventorySlotButtons();
+}
+
+function updateInventorySlotButtons() {
+  document.querySelectorAll('.inventory-slot-btn').forEach((btn, i) => {
+    if (i === currentInventorySlot) {
+      btn.style.borderColor = '#ffd700';
+      btn.style.background = 'rgba(255,215,0,0.15)';
+      btn.style.color = '#ffd700';
+    } else {
+      btn.style.borderColor = 'rgba(255,255,255,0.1)';
+      btn.style.background = 'transparent';
+      btn.style.color = 'var(--text-dim)';
+    }
+  });
+}
+
 </script></body>
 </html>
