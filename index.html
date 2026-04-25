@@ -776,7 +776,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 <div class="tab-bar">
 <button class="tab-btn active" onclick="switchTab('pull', this)">🎲 PULL</button>
 <button class="tab-btn" onclick="switchTab('browse', this)">📖 BROWSE</button>
-<button class="tab-btn" onclick="switchTab('vault', this)">🏆 VAULT</button>
 <button class="tab-btn" onclick="switchTab('wishlist', this)">⭐ WISHLIST</button>
 <button class="tab-btn" onclick="switchTab('mod', this)">⚙️ MOD</button>
 <button class="tab-btn" onclick="switchTab('inventory', this)">📦 INVENTORY</button>
@@ -833,6 +832,11 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 <button class="filter-btn" onclick="setFilter('item', this)">📦 Items</button>
 </div>
 <span id="search-results-count"></span>
+<div style="margin-top: 12px; padding: 12px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 6px;">
+<div style="font-size: 11px; color: #ef4444; font-weight: 700; margin-bottom: 6px;">🚫 BANNED ITEMS: <span id="browse-banned-count">0</span></div>
+<div style="font-size: 10px; color: var(--text-dim); margin-bottom: 8px;">Click any entry to toggle its ban status. When items are banned, pulls won't save to your collection.</div>
+<button onclick="clearAllBans()" style="width: 100%; background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.5); color: #ef4444; padding: 6px; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; font-weight: 700;">CLEAR ALL BANS</button>
+</div>
 </div>
 <main class="main" id="browse-main"><section class="rank-section" id="rank-S" style="--accent:#ffd700;--glow:#ffd700;">
 <div class="rank-header" onclick="toggleSection('S')">
@@ -2286,33 +2290,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 <div class="entry-desc">A grimoire containing the complete knowledge and muscle memory of a 2-stripe purple belt in Brazilian Jiu-Jitsu. Upon reading, the knowledge transfers instantly and the grimoire turns to ash. The bearer has internalized a wide and well-rounded foundation of Brazilian Jiu-Jitsu — guard passing, sweeps, submissions from multiple positions, escapes, and transitions. A 2-stripe purple belt can hold their own against most practitioners below their level and begin to develop their own personal game. Dangerous on the ground against any untrained opponent.</div>
 </div></div></div>
 </section></main>
-</div>
-
-<!-- VAULT TAB -->
-<div class="tab-content" id="tab-vault">
-<div style="padding: 20px;">
-<div style="font-family: 'Cinzel', serif; font-size: 16px; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 16px; color: var(--text);">🏆 YOUR VAULT</div>
-<div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
-  <select id="vault-rank-filter" onchange="updateVaultDisplay()" style="background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px; color: var(--text); font-family: 'Cinzel', serif; font-size: 11px;">
-    <option value="">All Ranks</option>
-    <option value="S">S Rank</option>
-    <option value="A">A Rank</option>
-    <option value="B">B Rank</option>
-    <option value="C">C Rank</option>
-    <option value="D">D Rank</option>
-    <option value="E">E Rank</option>
-    <option value="F">F Rank</option>
-  </select>
-  <select id="vault-type-filter" onchange="updateVaultDisplay()" style="background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px; color: var(--text); font-family: 'Cinzel', serif; font-size: 11px;">
-    <option value="">All Types</option>
-    <option value="power">⚡ Powers</option>
-    <option value="item">📦 Items</option>
-  </select>
-  <button onclick="clearVault()" style="background: rgba(248,113,113,0.2); border: 1px solid rgba(248,113,113,0.5); color: #f87171; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700;">CLEAR VAULT</button>
-</div>
-<div id="vault-grid" class="vault-grid"></div>
-<div id="vault-empty" style="text-align: center; color: var(--text-dim); padding: 40px 20px;">No items in vault yet. Start pulling!</div>
-</div>
 </div>
 
 <!-- WISHLIST TAB -->
@@ -6799,8 +6776,139 @@ loadPityCounter();
 // ==================== EVOLUTION & INVENTORY SYSTEM ====================
 const INVENTORY_KEY = 'gacha-inventory';
 const INVENTORY_SLOTS_KEY = 'gacha-inventory-slots';
+const SHADOW_INVENTORY_KEY = 'gacha-shadow-inventory';
+const SLOT_NAMES_KEY = 'gacha-slot-names';
 let currentInventorySlot = 0;
 let inventorySlots = {};
+let slotNames = {};
+let shadowInventorySlot = null;
+let shadowInventoryEnabled = false;
+
+
+function loadShadowInventorySettings() {
+  try {
+    const saved = localStorage.getItem(SHADOW_INVENTORY_KEY);
+    if (saved) {
+      const data = JSON.parse(saved);
+      shadowInventorySlot = data.slot;
+      shadowInventoryEnabled = data.enabled;
+    }
+  } catch (e) {
+    shadowInventorySlot = null;
+    shadowInventoryEnabled = false;
+  }
+}
+
+function saveShadowInventorySettings() {
+  localStorage.setItem(SHADOW_INVENTORY_KEY, JSON.stringify({
+    slot: shadowInventorySlot,
+    enabled: shadowInventoryEnabled
+  }));
+}
+
+function toggleShadowInventory() {
+  shadowInventoryEnabled = document.getElementById('shadow-inv-toggle').checked;
+  saveShadowInventorySettings();
+  showToast(shadowInventoryEnabled ? 'Shadow Archive enabled' : 'Shadow Archive disabled', 'info');
+}
+
+function setShadowInventory(slotNum) {
+  shadowInventorySlot = slotNum ? parseInt(slotNum) : null;
+  saveShadowInventorySettings();
+  if (shadowInventorySlot !== null) {
+    showToast(`Shadow Archive set to Slot ${shadowInventorySlot + 1}`, 'info');
+  }
+}
+
+function addInventorySlot() {
+  const newSlotNum = Object.keys(inventorySlots).length;
+  inventorySlots[`slot-${newSlotNum}`] = {};
+  saveInventory();
+  renderInventorySlots();
+  showToast(`Added Slot ${newSlotNum + 1}`, 'success');
+}
+
+function renderInventorySlots() {
+  const container = document.getElementById('inventory-slots-container');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  Object.keys(inventorySlots).forEach((key, idx) => {
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'display: flex; gap: 4px; align-items: center;';
+    
+    const btn = document.createElement('button');
+    btn.className = 'inventory-slot-btn';
+    btn.textContent = getSlotName(idx);
+    btn.onclick = () => switchInventorySlot(idx);
+    btn.style.cssText = `padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: transparent; color: var(--text-dim); cursor: pointer; font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; transition: all 0.2s;`;
+    
+    if (currentInventorySlot === idx) {
+      btn.style.borderColor = '#ffd700';
+      btn.style.color = '#ffd700';
+    }
+    
+    const renameBtn = document.createElement('button');
+    renameBtn.textContent = '✏️';
+    renameBtn.onclick = () => renameSlot(idx);
+    renameBtn.style.cssText = `padding: 6px 8px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; background: transparent; color: var(--text-dim); cursor: pointer; font-size: 12px; transition: all 0.2s;`;
+    renameBtn.title = 'Rename this slot';
+    
+    wrapper.appendChild(btn);
+    wrapper.appendChild(renameBtn);
+    container.appendChild(wrapper);
+  });
+  
+  // Update shadow inventory select
+  const select = document.getElementById('shadow-inv-select');
+  if (select) {
+    select.innerHTML = '<option value="">Select Shadow Archive...</option>';
+    Object.keys(inventorySlots).forEach((key, idx) => {
+      const opt = document.createElement('option');
+      opt.value = idx;
+      opt.textContent = getSlotName(idx);
+      if (shadowInventorySlot === idx) opt.selected = true;
+      select.appendChild(opt);
+    });
+  }
+}
+
+function switchInventorySlot(idx) {
+  currentInventorySlot = idx;
+  saveInventory();
+  renderInventory();
+  renderInventorySlots();
+  showToast(`Switched to Slot ${idx + 1}`, 'info');
+}
+
+
+function loadSlotNames() {
+  try {
+    const saved = localStorage.getItem(SLOT_NAMES_KEY);
+    if (saved) slotNames = JSON.parse(saved);
+  } catch (e) {
+    slotNames = {};
+  }
+}
+
+function saveSlotNames() {
+  localStorage.setItem(SLOT_NAMES_KEY, JSON.stringify(slotNames));
+}
+
+function getSlotName(idx) {
+  return slotNames[`slot-${idx}`] || `Slot ${idx + 1}`;
+}
+
+function renameSlot(idx) {
+  const currentName = getSlotName(idx);
+  const newName = prompt(`Rename Slot ${idx + 1}:`, currentName);
+  if (newName && newName.trim()) {
+    slotNames[`slot-${idx}`] = newName.trim();
+    saveSlotNames();
+    renderInventorySlots();
+    showToast(`Renamed to: ${newName}`, 'success');
+  }
+}
 
 function loadInventory() {
   try {
@@ -6809,7 +6917,14 @@ function loadInventory() {
   } catch (e) {
     inventorySlots = {};
   }
-  if (!inventorySlots['slot-0']) inventorySlots['slot-0'] = {};
+  // Initialize 10 default slots if empty
+  for (let i = 0; i < 10; i++) {
+    if (!inventorySlots[`slot-${i}`]) {
+      inventorySlots[`slot-${i}`] = {};
+    }
+  }
+  loadSlotNames();
+  loadShadowInventorySettings();
 }
 
 function saveInventory() {
@@ -6883,6 +6998,10 @@ function addToInventory(entry) {
 }
 
 loadInventory();
+
+  // Initialize inventory slots display
+  renderInventorySlots();
+  updateBannedCounter();
 
 // ==================== BANNING SYSTEM ====================
 const BANNED_ENTRIES_KEY = 'gacha-banned-entries';
@@ -6990,6 +7109,23 @@ function pickWeightedEntry(forcePity = false) {
   return weighted[weighted.length - 1].entry;
 }
 
+
+function clearAllBans() {
+  const ok = confirm('Clear all banned items?');
+  if (!ok) return;
+  bannedEntries.clear();
+  saveBannedEntries();
+  renderModTable();
+  rebuildBrowse();
+  updateBannedCounter();
+  showToast('All bans cleared.', 'info');
+}
+
+function updateBannedCounter() {
+  const display = document.getElementById('browse-banned-count');
+  if (display) display.textContent = bannedEntries.size;
+}
+
 function doPull(count) {
   const btns = document.querySelectorAll('.pull-btn');
   btns.forEach(b => b.disabled = true);
@@ -7011,11 +7147,27 @@ function doPull(count) {
     savePityCounter();
   }
   
+  // BANNING LOCKDOWN: If any items are banned, check shadow inventory
+  const hasBans = bannedEntries.size > 0;
+  
   results.forEach(r => {
     pullHistory.unshift(r);
-    addToInventory(r);
+    if (!hasBans) {
+      addToInventory(r);
+    } else if (shadowInventoryEnabled && shadowInventorySlot !== null) {
+      // Save to shadow inventory instead
+      const tempSlot = currentInventorySlot;
+      currentInventorySlot = shadowInventorySlot;
+      addToInventory(r);
+      currentInventorySlot = tempSlot;
+    }
   });
   if (pullHistory.length > 100) pullHistory = pullHistory.slice(0, 100);
+  
+  if (hasBans) {
+    showToast('⚠️ Banning Mode Active: Pulls are shown but NOT saved to collection/inventory.', 'warn');
+  }
+
   updateHistory();
   if (pullAnimationEnabled && results.some(r => r.rank === 'S')) {
     const flash = document.createElement('div');
@@ -8512,12 +8664,27 @@ setInterval(() => {
 <div class="rank-header">
 <span class="rank-title">Inventory Slots</span>
 </div>
-<div class="rank-content" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;">
-<button class="inventory-slot-btn" onclick="switchInventorySlot(0)" style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: transparent; color: var(--text-dim); cursor: pointer; font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; transition: all 0.2s;">SLOT 1</button>
-<button class="inventory-slot-btn" onclick="switchInventorySlot(1)" style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: transparent; color: var(--text-dim); cursor: pointer; font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; transition: all 0.2s;">SLOT 2</button>
-<button class="inventory-slot-btn" onclick="switchInventorySlot(2)" style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: transparent; color: var(--text-dim); cursor: pointer; font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; transition: all 0.2s;">SLOT 3</button>
-<button class="inventory-slot-btn" onclick="switchInventorySlot(3)" style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: transparent; color: var(--text-dim); cursor: pointer; font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; transition: all 0.2s;">SLOT 4</button>
-<button class="inventory-slot-btn" onclick="switchInventorySlot(4)" style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: transparent; color: var(--text-dim); cursor: pointer; font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; transition: all 0.2s;">SLOT 5</button>
+<div class="rank-content" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;" id="inventory-slots-container">
+<!-- Slots will be generated dynamically -->
+</div>
+<button onclick="addInventorySlot()" style="width: 100%; margin-top: 12px; background: rgba(52,211,153,0.2); border: 1px solid rgba(52,211,153,0.5); color: #34d399; padding: 8px; border-radius: 6px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700;">+ ADD NEW SLOT</button>
+</div>
+
+<div class="rank-section">
+<div class="rank-header">
+<span class="rank-title">Shadow Archive (Restricted Mode)</span>
+</div>
+<div class="rank-content">
+<div style="margin-bottom: 12px;">
+<label style="color: var(--text-dim); font-size: 11px; display: flex; align-items: center; gap: 8px;">
+<input type="checkbox" id="shadow-inv-toggle" onchange="toggleShadowInventory()" />
+Enable Shadow Archive
+</label>
+<div style="font-size: 10px; color: var(--text-dim); margin-top: 6px;">When enabled, pulls during banned sessions will save to this slot instead of being discarded.</div>
+</div>
+<select id="shadow-inv-select" onchange="setShadowInventory(this.value)" style="width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px; color: var(--text); font-family: 'Cinzel', serif; font-size: 11px;">
+<option value="">Select Shadow Archive...</option>
+</select>
 </div>
 </div>
 
