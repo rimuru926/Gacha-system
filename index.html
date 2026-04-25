@@ -6965,6 +6965,8 @@ function loadInventory() {
       inventorySlots[`slot-${i}`] = {};
     }
   }
+  // Always default to slot 0 (Slot 1)
+  currentInventorySlot = 0;
   loadSlotNames();
   loadShadowInventorySettings();
 }
