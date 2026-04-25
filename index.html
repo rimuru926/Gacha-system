@@ -6697,6 +6697,8 @@ function isBanned(entry) {
 
 loadBannedEntries();
 
+
+
 const RANK_COLORS = {"S": {"accent": "#ffd700", "badge": "linear-gradient(135deg, #ffd700, #ff8c00)", "glow": "#ffd700", "card": "linear-gradient(135deg, #2a1500, #1a0a00)", "border": "#ffd700"}, "A": {"accent": "#c084fc", "badge": "linear-gradient(135deg, #c084fc, #7c3aed)", "glow": "#a855f7", "card": "linear-gradient(135deg, #1a0a2a, #0a0a1a)", "border": "#c084fc"}, "B": {"accent": "#34d399", "badge": "linear-gradient(135deg, #34d399, #059669)", "glow": "#10b981", "card": "linear-gradient(135deg, #002a14, #001a0a)", "border": "#34d399"}, "C": {"accent": "#60a5fa", "badge": "linear-gradient(135deg, #60a5fa, #2563eb)", "glow": "#3b82f6", "card": "linear-gradient(135deg, #001830, #001020)", "border": "#60a5fa"}, "D": {"accent": "#e879f9", "badge": "linear-gradient(135deg, #e879f9, #a21caf)", "glow": "#d946ef", "card": "linear-gradient(135deg, #200020, #100010)", "border": "#e879f9"}, "E": {"accent": "#fb923c", "badge": "linear-gradient(135deg, #fb923c, #c2410c)", "glow": "#f97316", "card": "linear-gradient(135deg, #201200, #100a00)", "border": "#fb923c"}, "F": {"accent": "#94a3b8", "badge": "linear-gradient(135deg, #94a3b8, #475569)", "glow": "#64748b", "card": "linear-gradient(135deg, #141414, #0a0a0a)", "border": "#94a3b8"}};
 const RANK_LABELS = {"S": "GOD-LIKE", "A": "DEMI-GOD", "B": "PEAK MORTAL", "C": "ELITE", "D": "ADVANCED", "E": "STANDARD", "F": "BASIC"};
 const RANKS = ['S','A','B','C','D','E','F'];
@@ -6959,7 +6961,7 @@ function loadInventory() {
   }
   // Initialize 10 default slots if empty
   for (let i = 0; i < 10; i++) {
-    if (!inventorySlots[`slot-${i}`]) {
+    if (!inventorySlots[`slot-${i}`] || typeof inventorySlots[`slot-${i}`] !== 'object') {
       inventorySlots[`slot-${i}`] = {};
     }
   }
@@ -7158,12 +7160,12 @@ function doPull(count) {
   results.forEach(r => {
     pullHistory.unshift(r);
     if (!hasBans) {
-      addToInventory(r);
+      addToInventory(r); if(typeof updateCollection === 'function') updateCollection(r);
     } else if (shadowInventoryEnabled && shadowInventorySlot !== null) {
       // Save to shadow inventory instead
       const tempSlot = currentInventorySlot;
       currentInventorySlot = shadowInventorySlot;
-      addToInventory(r);
+      addToInventory(r); if(typeof updateCollection === 'function') updateCollection(r);
       currentInventorySlot = tempSlot;
     }
   });
@@ -8601,37 +8603,36 @@ setInterval(() => {
 
     // Override renderCollection to show counts
     window.renderCollection = function() {
-        const container = document.getElementById('collection-grid');
-        if (!container) return;
-        container.innerHTML = '';
+    const container = document.getElementById('collection-grid');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    // Get all unique entries from the entries pool
+    const allEntries = entries;
+    if (allEntries.length === 0) {
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-dim); padding: 40px;">No entries in collection.</div>';
+        return;
+    }
+
+    const colors = {S: '#ffd700', A: '#c084fc', B: '#34d399', C: '#60a5fa', D: '#e879f9', E: '#fb923c', F: '#94a3b8'};
+    
+    allEntries.forEach(entry => {
+        const count = collection[entry.name] || 0;
+        const banned = isBanned(entry);
+        const card = document.createElement('div');
+        card.className = 'collection-card';
+        card.style.cssText = `background: var(--surface2); border: 1px solid ${banned ? '#ef4444' : 'var(--border)'}; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; position: relative; opacity: ${count > 0 ? 1 : 0.5};`;
+        card.onclick = () => toggleBan(entry);
         
-        const allItems = [...entries].sort((a, b) => {
-            const rankDiff = RANKS.indexOf(a.rank) - RANKS.indexOf(b.rank);
-            return rankDiff !== 0 ? rankDiff : a.name.localeCompare(b.name);
-        });
-
-        let collectedCount = 0;
-        const totalCount = allItems.length;
-
-        allItems.forEach(item => {
-            const count = collection[item.name] || 0;
-            if (count > 0) collectedCount++;
-            
-            const card = document.createElement('div');
-            card.className = `collection-card ${count > 0 ? 'unlocked' : 'locked'}`;
-            card.innerHTML = `
-                <div class="collection-rank rank-${item.rank}">${item.rank}</div>
-                <div class="collection-name">${escHtml(item.name)}</div>
-                <div class="collection-count">${count > 0 ? 'Obtained: ' + count : 'LOCKED'}</div>
-            `;
-            container.appendChild(card);
-        });
-
-        const stats = document.getElementById('collection-stats');
-        if (stats) {
-            stats.textContent = `${collectedCount} / ${totalCount} Unique Items Collected`;
-        }
-    };
+        card.innerHTML = `
+            <div style="font-size: 14px; font-weight: 700; color: ${colors[entry.rank]}; margin-bottom: 6px;">${entry.rank}</div>
+            <div style="font-size: 12px; color: var(--text); margin-bottom: 4px;">${entry.name}</div>
+            <div style="font-size: 11px; color: var(--text-dim);">${count > 0 ? 'COLLECTED: ' + count : 'NOT COLLECTED'}</div>
+            ${banned ? '<div style="position: absolute; top: 5px; right: 5px; color: #ef4444; font-size: 10px; font-weight: bold;">BANNED</div>' : ''}
+        `;
+        container.appendChild(card);
+    });
+};
 
     // Add CSS for the count display
     const style = document.createElement('style');
@@ -9370,34 +9371,7 @@ window.addEventListener('beforeunload', e => {
 });
 
 
-document.addEventListener("DOMContentLoaded", () => {
-  // Core initialization
-  loadBannedEntries();
-  loadInventory();
-  loadSlotNames();
-  loadPityCounter();
-  loadWishlist();
-  
-  // UI initialization
-  initPullSettings();
-  updateRatesDisplay();
-  loadRatesToEditor();
-  initFloatingShards();
-  initBGM();
-  updateWishlistDisplay();
-  renderInventorySlots();
-  renderInventory();
-  updateBannedCounter();
-  
-  // Pity UI
-  const pityToggle = document.getElementById('pity-toggle');
-  if (pityToggle) pityToggle.checked = pityEnabled;
-  updatePityDisplay();
-  
-  // Event listeners
-  document.querySelectorAll('.pull-btn').forEach(btn => {
-    btn.addEventListener('click', () => playP5RSound('click'));
-  });
+
   
   document.querySelectorAll('button').forEach(btn => {
     btn.addEventListener('mouseenter', playHoverSound);
