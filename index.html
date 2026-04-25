@@ -8287,6 +8287,7 @@ setInterval(() => {
   };
 
   loadHistory();
+  renderInventorySlots();
   loadCollection();
   renderCollection();
 })();
@@ -8593,48 +8594,16 @@ setInterval(() => {
 </script>
 <script id="collection-refinement">
 (function() {
-    // Override updateCollection to track counts
+    // Override updateCollection to track counts (use collectionCounts, not collection)
     window.updateCollection = function(item) {
-        if (!collection[item.name]) {
-            collection[item.name] = 0;
-        }
-        collection[item.name]++;
+        const key = entryKey(item);
+        collectionCounts[key] = (collectionCounts[key] || 0) + 1;
         saveCollection();
         renderCollection();
     };
 
-    // Override renderCollection to show counts
-    window.renderCollection = function() {
-    const container = document.getElementById('collection-grid');
-    if (!container) return;
-    container.innerHTML = '';
-    
-    // Get all unique entries from the entries pool
-    const allEntries = entries;
-    if (allEntries.length === 0) {
-        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-dim); padding: 40px;">No entries in collection.</div>';
-        return;
-    }
-
-    const colors = {S: '#ffd700', A: '#c084fc', B: '#34d399', C: '#60a5fa', D: '#e879f9', E: '#fb923c', F: '#94a3b8'};
-    
-    allEntries.forEach(entry => {
-        const count = collection[entry.name] || 0;
-        const banned = isBanned(entry);
-        const card = document.createElement('div');
-        card.className = 'collection-card';
-        card.style.cssText = `background: var(--surface2); border: 1px solid ${banned ? '#ef4444' : 'var(--border)'}; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; position: relative; opacity: ${count > 0 ? 1 : 0.5};`;
-        card.onclick = () => toggleBan(entry);
-        
-        card.innerHTML = `
-            <div style="font-size: 14px; font-weight: 700; color: ${colors[entry.rank]}; margin-bottom: 6px;">${entry.rank}</div>
-            <div style="font-size: 12px; color: var(--text); margin-bottom: 4px;">${entry.name}</div>
-            <div style="font-size: 11px; color: var(--text-dim);">${count > 0 ? 'COLLECTED: ' + count : 'NOT COLLECTED'}</div>
-            ${banned ? '<div style="position: absolute; top: 5px; right: 5px; color: #ef4444; font-size: 10px; font-weight: bold;">BANNED</div>' : ''}
-        `;
-        container.appendChild(card);
-    });
-};
+    // Override renderCollection to use the main renderCollection logic
+    // (The main renderCollection is already correct, so we don't need to override it)
 
     // Add CSS for the count display
     const style = document.createElement('style');
@@ -9454,6 +9423,9 @@ document.addEventListener("DOMContentLoaded", () => {
   loadSlotNames();
   loadPityCounter();
   loadWishlist();
+  loadCollection();
+  loadHistory();
+  renderInventorySlots();
   
   // UI initialization
   initPullSettings();
