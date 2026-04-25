@@ -6972,7 +6972,11 @@ function loadInventory() {
 }
 
 function saveInventory() {
-  localStorage.setItem(INVENTORY_KEY, JSON.stringify(inventorySlots));
+  try {
+    localStorage.setItem(INVENTORY_KEY, JSON.stringify(inventorySlots));
+  } catch (e) {
+    console.warn('Failed to save inventory:', e);
+  }
 }
 
 function getCurrentInventory() {
@@ -7296,7 +7300,7 @@ function renderModTable() {
       <td><div class="mod-action-btns">
         <button class="mod-edit-btn" onclick="openEntryForm(${e._idx})">EDIT</button>
         <button class="mod-delete-btn" onclick="deleteEntry(${e._idx})">DELETE</button>
-        <button class="mod-ban-btn" onclick="toggleBanEntry(${e._idx})" style="background:${isBannedEntry ? 'rgba(239,68,68,0.3)' : 'rgba(100,116,139,0.2)'};color:${isBannedEntry ? '#ef4444' : '#94a3b8'};border:1px solid ${isBannedEntry ? 'rgba(239,68,68,0.5)' : 'rgba(100,116,139,0.4)'};padding:6px 12px;border-radius:4px;cursor:pointer;font-family:'Cinzel',serif;font-size:10px;font-weight:700;transition:all 0.2s;">${isBannedEntry ? '🚫 BANNED' : '🔒 BAN'}</button>
+        
       </div></td>
     </tr>`;
   }).join('');
