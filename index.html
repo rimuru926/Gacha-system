@@ -561,6 +561,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
     transform: translateX(0) skewX(0deg);
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
   }
+}
 
 /* Visual Impact Effects */
 @keyframes shardFloat {
@@ -733,6 +734,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
 /* Summoning Sequence Animation */
 @keyframes summonShutter {
   0% { clip-path: polygon(0 0, 0 0, 0 100%, 0 100%); opacity: 0; }
@@ -834,7 +836,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 <span id="search-results-count"></span>
 <div style="margin-top: 12px; padding: 12px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 6px;">
 <div style="font-size: 11px; color: #ef4444; font-weight: 700; margin-bottom: 6px;">🚫 BANNED ITEMS: <span id="browse-banned-count">0</span></div>
-<div style="font-size: 10px; color: var(--text-dim); margin-bottom: 8px;">Click any entry to toggle its ban status. When items are banned, pulls won't save to your collection.</div>
+<div style="font-size: 10px; color: var(--text-dim); margin-bottom: 8px;">Use the 🚫 BAN button on any entry to toggle its ban status. When items are banned, pulls won't save to your collection.</div>
 <button onclick="clearAllBans()" style="width: 100%; background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.5); color: #ef4444; padding: 6px; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; font-weight: 700;">CLEAR ALL BANS</button>
 </div>
 </div>
@@ -1711,8 +1713,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 </div><div class="entry item-entry" data-desc="A grimoire containing the complete knowledge and muscle memory of an undisputed world champion in professional boxing. Upon reading, the knowledge transfers instantly and the grimoire turns to ash. Undisputed status — holding all four major world titles simultaneously across the World Boxing Association, World Boxing Council, International Boxing Federation, and World Boxing Organization — is one of the rarest achievements in all of sport. In the modern four-belt era, fewer than a handful of fighters have ever accomplished it. The bearer gains the complete mastery of a fighter who has beaten every credible challenger their weight class has produced — flawless technical execution under maximum pressure, championship-level conditioning, an intuitive ability to adapt mid-fight, and the psychological fortitude to perform when everything is on the line. Combined with extraordinary physical attributes, the boxing knowledge in this grimoire scales without limit." data-name="Boxing Grimoire — Undisputed Champion" data-rank="D" data-type="item">
 <div class="entry-header"><span class="entry-num">81.</span><span class="entry-name">Boxing Grimoire — Undisputed Champion</span></div>
 <div class="entry-desc">A grimoire containing the complete knowledge and muscle memory of an undisputed world champion in professional boxing. Upon reading, the knowledge transfers instantly and the grimoire turns to ash. Undisputed status — holding all four major world titles simultaneously across the World Boxing Association, World Boxing Council, International Boxing Federation, and World Boxing Organization — is one of the rarest achievements in all of sport. In the modern four-belt era, fewer than a handful of fighters have ever accomplished it. The bearer gains the complete mastery of a fighter who has beaten every credible challenger their weight class has produced — flawless technical execution under maximum pressure, championship-level conditioning, an intuitive ability to adapt mid-fight, and the psychological fortitude to perform when everything is on the line. Combined with extraordinary physical attributes, the boxing knowledge in this grimoire scales without limit.</div>
-</div><div class="entry item-entry" data-desc="A grimoire containing the complete knowledge and muscle memory of a 6th degree black belt in Brazilian Jiu-Jitsu — the highest achievable black belt rank before the coral belt. Upon reading, the knowledge transfers instantly and the grimoire turns to ash. Reaching the 6th degree requires a minimum of 31 years as a black belt. The bearer possesses a complete and deeply refined understanding of Brazilian Jiu-Jitsu across every dimension — technique, strategy, teaching methodology, and combat application. Every movement is executed with the effortless precision of a lifetime practitioner. In the hands of someone with extraordinary physical capability, the leverage and submission principles of Brazilian Jiu-Jitsu at this level become something else entirely." data-name="Brazilian Jiu-Jitsu Grimoire — 6th Degree Black Bel" data-rank="D" data-type="item">
-<div class="entry-header"><span class="entry-num">82.</span><span class="entry-name">Brazilian Jiu-Jitsu Grimoire — 6th Degree Black Bel</span></div>
+</div><div class="entry item-entry" data-desc="A grimoire containing the complete knowledge and muscle memory of a 6th degree black belt in Brazilian Jiu-Jitsu — the highest achievable black belt rank before the coral belt. Upon reading, the knowledge transfers instantly and the grimoire turns to ash. Reaching the 6th degree requires a minimum of 31 years as a black belt. The bearer possesses a complete and deeply refined understanding of Brazilian Jiu-Jitsu across every dimension — technique, strategy, teaching methodology, and combat application. Every movement is executed with the effortless precision of a lifetime practitioner. In the hands of someone with extraordinary physical capability, the leverage and submission principles of Brazilian Jiu-Jitsu at this level become something else entirely." data-name="Brazilian Jiu-Jitsu Grimoire — 6th Degree Black Belt" data-rank="D" data-type="item">
+<div class="entry-header"><span class="entry-num">82.</span><span class="entry-name">Brazilian Jiu-Jitsu Grimoire — 6th Degree Black Belt</span></div>
 <div class="entry-desc">A grimoire containing the complete knowledge and muscle memory of a 6th degree black belt in Brazilian Jiu-Jitsu — the highest achievable black belt rank before the coral belt. Upon reading, the knowledge transfers instantly and the grimoire turns to ash. Reaching the 6th degree requires a minimum of 31 years as a black belt. The bearer possesses a complete and deeply refined understanding of Brazilian Jiu-Jitsu across every dimension — technique, strategy, teaching methodology, and combat application. Every movement is executed with the effortless precision of a lifetime practitioner. In the hands of someone with extraordinary physical capability, the leverage and submission principles of Brazilian Jiu-Jitsu at this level become something else entirely.</div>
 </div></div></div>
 </section><section class="rank-section" id="rank-E" style="--accent:#fb923c;--glow:#f97316;">
@@ -2325,6 +2327,12 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 <div id="wishlist-list"></div>
 <div id="wishlist-empty" style="text-align: center; color: var(--text-dim); padding: 40px 20px;">No wishlist items yet. Add something you want to see!</div>
 </div>
+
+<div style="margin-top: 24px; border-top: 1px solid var(--border); padding-top: 20px;">
+<div style="font-family: 'Cinzel', serif; font-size: 14px; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 12px; color: var(--text);">🗃 PULLED VAULT</div>
+<div id="vault-grid" class="vault-grid" style="display:none;"></div>
+<div id="vault-empty" style="text-align: center; color: var(--text-dim); padding: 20px;">Nothing in the vault yet. Pull items to fill it!</div>
+<button onclick="clearVault()" style="margin-top: 12px; width: 100%; background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); color: #f87171; padding: 8px; border-radius: 6px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; font-weight: 700;">🗑 CLEAR VAULT</button>
 </div>
 
 <!-- MOD TAB -->
@@ -2363,7 +2371,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 <input id="gist-id-input" placeholder="Gist ID or full URL" style="width: 100%; padding: 6px; background: #0e0e18; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #e2e8f0; font-family: monospace; font-size: 11px;" type="text" value="1fe8dbbd7b41c48bbfd28bcfbaaf1b0e"/>
 <input id="gist-file-input" placeholder="File name (default: fateforge_entries.json)" style="width: 100%; padding: 6px; background: #0e0e18; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #e2e8f0; font-family: monospace; font-size: 11px;" type="text" value="fateforge_entries.json"/>
 <input id="gist-token-input" placeholder="GitHub token (for saving)" style="width: 100%; padding: 6px; background: #0e0e18; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #e2e8f0; font-family: monospace; font-size: 11px;" type="password"/>
-<div style="font-size: 10px; color: #64748b; margin-top: 2px; font-family: 'Cinzel', serif; letter-spacing: 0.05em;">🔒 Token stored in session only — never persisted to disk or URLs</div>
+<div style="font-size: 10px; color: #64748b; margin-top: 2px; font-family: 'Cinzel', serif; letter-spacing: 0.05em;">🔒 Token stored in localStorage and pre-filled automatically on reload</div>
 </div>
 <div style="display: flex; gap: 8px; margin-bottom: 8px;">
 <button onclick="gistLoad()" style="flex: 1; padding: 6px; background: #4f46e5; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">LOAD</button>
@@ -6561,7 +6569,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 </tr><tr>
 <td><span class="mod-rank-pill" style="background:linear-gradient(135deg, #e879f9, #a21caf)">D</span>
 <br/><span class="mod-type-pill" style="background:rgba(251,191,36,0.15);color:#fbbf24">📦 Item</span></td>
-<td><div class="mod-entry-name">Brazilian Jiu-Jitsu Grimoire — 6th Degree Black Bel</div></td>
+<td><div class="mod-entry-name">Brazilian Jiu-Jitsu Grimoire — 6th Degree Black Belt</div></td>
 <td><div class="mod-entry-desc">A grimoire containing the complete knowledge and muscle memory of a 6th degree black belt in Brazilian Jiu-Jitsu — the highest achievable black belt rank before the coral belt. Upon reading, the knowledge transfers instantly and the grimoire turns to ash. Reaching the 6th degree requires a minimum of 31 years as a black belt. The bearer possesses a complete and deeply refined understanding of Brazilian Jiu-Jitsu across every dimension — technique, strategy, teaching methodology, and combat application. Every movement is executed with the effortless precision of a lifetime practitioner. In the hands of someone with extraordinary physical capability, the leverage and submission principles of Brazilian Jiu-Jitsu at this level become something else entirely.</div></td>
 <td><div class="mod-action-btns">
 <button class="mod-edit-btn" onclick="openEntryForm(462)">EDIT</button>
@@ -6686,8 +6694,8 @@ function toggleBan(entry) {
     bannedEntries.add(key);
   }
   saveBannedEntries();
-  if (typeof renderModTable === 'function') if(typeof renderModTable === 'function') renderModTable();
-  if (typeof rebuildBrowse === 'function') if(typeof rebuildBrowse === 'function') rebuildBrowse();
+  if (typeof renderModTable === 'function') renderModTable();
+  if (typeof rebuildBrowse === 'function') rebuildBrowse();
   if (typeof updateBannedCounter === 'function') updateBannedCounter();
 }
 
@@ -7047,12 +7055,6 @@ function addToInventory(entry) {
 
 loadInventory();
 
-  // Initialize inventory slots display
-  renderInventorySlots();
-  updateBannedCounter();
-
-
-
 let pullTypeFilter = 'all';
 
 function setPullFilter(f) {
@@ -7123,8 +7125,8 @@ function pickWeightedEntry(forcePity = false) {
 }
 
 
-function clearAllBans() {
-  const ok = confirm('Clear all banned items?');
+async function clearAllBans() {
+  const ok = await showConfirm('Clear all banned items?', 'Clear All', 'Cancel');
   if (!ok) return;
   bannedEntries.clear();
   saveBannedEntries();
@@ -7137,6 +7139,8 @@ function clearAllBans() {
 function updateBannedCounter() {
   const display = document.getElementById('browse-banned-count');
   if (display) display.textContent = bannedEntries.size;
+  const display2 = document.getElementById('banned-count-display');
+  if (display2) display2.textContent = bannedEntries.size;
 }
 
 function doPull(count) {
@@ -7158,6 +7162,7 @@ function doPull(count) {
       }
     });
     savePityCounter();
+    updatePityDisplay();
   }
   
   // BANNING LOCKDOWN: If any items are banned, check shadow inventory
@@ -7300,7 +7305,7 @@ function renderModTable() {
       <td><div class="mod-action-btns">
         <button class="mod-edit-btn" onclick="openEntryForm(${e._idx})">EDIT</button>
         <button class="mod-delete-btn" onclick="deleteEntry(${e._idx})">DELETE</button>
-        
+        <button class="mod-edit-btn" onclick="toggleBanEntry(${e._idx})" style="${isBannedEntry ? 'background:rgba(239,68,68,0.25);color:#f87171;border-color:rgba(239,68,68,0.5);' : 'background:rgba(239,68,68,0.1);color:#f87171;border-color:rgba(239,68,68,0.3);'}">${isBannedEntry ? '✓ UNBAN' : '🚫 BAN'}</button>
       </div></td>
     </tr>`;
   }).join('');
@@ -7389,6 +7394,14 @@ function toggleBanEntry(idx) {
   showToast(isBanned(entry) ? 'Entry banned.' : 'Entry unbanned.', 'info');
 }
 
+function toggleBanByKey(rank, type, name) {
+  const entry = { rank, type, name };
+  toggleBan(entry);
+  updateBannedCounter();
+  if(typeof rebuildBrowse === 'function') rebuildBrowse();
+  showToast(isBanned(entry) ? `Banned: ${name}` : `Unbanned: ${name}`, 'info');
+}
+
 // ==================== BROWSE REBUILD ====================
 function rebuildBrowse() {
   const main = document.getElementById('browse-main');
@@ -7407,8 +7420,16 @@ function rebuildBrowse() {
       if (powers.length) {
         content += '<div class="category-label powers-label">⚡ Powers / Abilities</div><div class="entries-grid">';
         powers.forEach((e, i) => {
-          content += `<div class="entry power-entry" data-rank="${rank}" data-type="power" data-name="${escAttrHtml(e.name)}" data-desc="${escAttrHtml(e.desc)}">
-            <div class="entry-header"><span class="entry-num">${i+1}.</span><span class="entry-name">${escHtml(e.name)}</span></div>
+          const banned = isBanned(e);
+          const banStyle = banned ? 'border-color:rgba(239,68,68,0.5);opacity:0.6;' : '';
+          const banBtnStyle = banned
+            ? 'background:rgba(239,68,68,0.25);color:#f87171;border:1px solid rgba(239,68,68,0.5);border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:Cinzel,serif;'
+            : 'background:rgba(239,68,68,0.08);color:#f87171;border:1px solid rgba(239,68,68,0.25);border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:Cinzel,serif;';
+          content += `<div class="entry power-entry" data-rank="${rank}" data-type="power" data-name="${escAttrHtml(e.name)}" data-desc="${escAttrHtml(e.desc)}" style="${banStyle}">
+            <div class="entry-header" style="display:flex;align-items:baseline;gap:8px;justify-content:space-between;flex-wrap:wrap;">
+              <div style="display:flex;align-items:baseline;gap:8px;"><span class="entry-num">${i+1}.</span><span class="entry-name">${escHtml(e.name)}</span></div>
+              <button style="${banBtnStyle}" onclick="event.stopPropagation();toggleBanByKey('${rank}','power','${escAttr(e.name)}')">${banned ? '✓ UNBAN' : '🚫 BAN'}</button>
+            </div>
             <div class="entry-desc">${escHtml(e.desc)}</div>
           </div>`;
         });
@@ -7417,8 +7438,16 @@ function rebuildBrowse() {
       if (items.length) {
         content += '<div class="category-label items-label">📦 Items</div><div class="entries-grid">';
         items.forEach((e, i) => {
-          content += `<div class="entry item-entry" data-rank="${rank}" data-type="item" data-name="${escAttrHtml(e.name)}" data-desc="${escAttrHtml(e.desc)}">
-            <div class="entry-header"><span class="entry-num">${i+1}.</span><span class="entry-name">${escHtml(e.name)}</span></div>
+          const banned = isBanned(e);
+          const banStyle = banned ? 'border-color:rgba(239,68,68,0.5);opacity:0.6;' : '';
+          const banBtnStyle = banned
+            ? 'background:rgba(239,68,68,0.25);color:#f87171;border:1px solid rgba(239,68,68,0.5);border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:Cinzel,serif;'
+            : 'background:rgba(239,68,68,0.08);color:#f87171;border:1px solid rgba(239,68,68,0.25);border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:Cinzel,serif;';
+          content += `<div class="entry item-entry" data-rank="${rank}" data-type="item" data-name="${escAttrHtml(e.name)}" data-desc="${escAttrHtml(e.desc)}" style="${banStyle}">
+            <div class="entry-header" style="display:flex;align-items:baseline;gap:8px;justify-content:space-between;flex-wrap:wrap;">
+              <div style="display:flex;align-items:baseline;gap:8px;"><span class="entry-num">${i+1}.</span><span class="entry-name">${escHtml(e.name)}</span></div>
+              <button style="${banBtnStyle}" onclick="event.stopPropagation();toggleBanByKey('${rank}','item','${escAttr(e.name)}')">${banned ? '✓ UNBAN' : '🚫 BAN'}</button>
+            </div>
             <div class="entry-desc">${escHtml(e.desc)}</div>
           </div>`;
         });
@@ -7639,8 +7668,8 @@ async function gistLoad() {
     try {
       localStorage.setItem('gist-id', document.getElementById('gist-id-input').value);
       localStorage.setItem('gist-file', filename);
-      // Token goes to sessionStorage only — never persisted to disk
-      if (token) sessionStorage.setItem('gist-token', token);
+      // Token persisted to localStorage so it survives tab closes
+      if (token) localStorage.setItem('gist-token', token);
     } catch (e) {
       console.warn('Could not save Gist settings:', e);
     }
@@ -7696,7 +7725,7 @@ async function gistSave() {
     try {
       localStorage.setItem('gist-id', document.getElementById('gist-id-input').value);
       localStorage.setItem('gist-file', filename);
-      // Token goes to sessionStorage only — never persisted to disk
+      // Token persisted to localStorage so it survives tab closes
       sessionStorage.setItem('gist-token', token);
     } catch (e) {
       console.warn('Could not save Gist settings:', e);
@@ -7717,7 +7746,7 @@ async function gistSave() {
   try {
     const id    = localStorage.getItem('gist-id')   || PUBLIC_GIST_ID;
     const file  = localStorage.getItem('gist-file') || 'fateforge_entries.json';
-    const token = sessionStorage.getItem('gist-token') || '';
+    const token = localStorage.getItem('gist-token') || sessionStorage.getItem('gist-token');
     document.getElementById('gist-id-input').value   = id;
     document.getElementById('gist-file-input').value = file;
     if (token) document.getElementById('gist-token-input').value = token;
@@ -7931,15 +7960,18 @@ setInterval(() => {
     } catch (e) { /* silent */ }
   }
 
-  // Second: try to fetch latest entries from the public Gist
+  // Second: try to fetch latest entries from the public Gist via API
   if (!PUBLIC_GIST_ID) return;
   try {
-    const ts   = Date.now();
-    const resp = await fetch(
-      `https://gist.githubusercontent.com/raw/${PUBLIC_GIST_ID}/fateforge_entries.json?t=${ts}`
-    );
+    const token = localStorage.getItem('gist-token') || sessionStorage.getItem('gist-token');
+    const headers = token ? { 'Authorization': 'token ' + token } : {};
+    const resp = await fetch(`https://api.github.com/gists/${PUBLIC_GIST_ID}`, { headers });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const data   = await resp.json();
+    const gist = await resp.json();
+    const file = gist.files['fateforge_entries.json'];
+    if (!file) throw new Error('fateforge_entries.json not found in Gist');
+    const content = file.truncated ? await (await fetch(file.raw_url)).text() : file.content;
+    const data   = JSON.parse(content);
     const loaded = Array.isArray(data) ? data : (data.entries || []);
     if (Array.isArray(loaded) && loaded.length > 0) {
       entries = loaded;
@@ -8260,12 +8292,37 @@ setInterval(() => {
     const actual = count === 10 ? 11 : count;
     const results = [];
     
-    // Simple pull without animation
-    for (let i = 0; i < actual; i++) results.push(pickWeightedEntry());
+    for (let i = 0; i < actual; i++) {
+      const usePity = (i === actual - 1) && pityEnabled;
+      results.push(pickWeightedEntry(usePity));
+    }
+
+    if (pityEnabled) {
+      results.forEach(r => {
+        if (['S', 'A', 'B'].includes(r.rank)) {
+          pityCounter = 0;
+        } else {
+          pityCounter++;
+        }
+      });
+      savePityCounter();
+      updatePityDisplay();
+    }
+
+    const hasBans = bannedEntries.size > 0;
 
     results.forEach(r => {
       pullHistory.unshift(r);
-      addToCollection(r);
+      if (!hasBans) {
+        addToInventory(r);
+        addToCollection(r);
+      } else if (shadowInventoryEnabled && shadowInventorySlot !== null) {
+        const tempSlot = currentInventorySlot;
+        currentInventorySlot = shadowInventorySlot;
+        addToInventory(r);
+        addToCollection(r);
+        currentInventorySlot = tempSlot;
+      }
     });
     if (pullHistory.length > 100) pullHistory = pullHistory.slice(0, 100);
     saveCollection();
@@ -8273,13 +8330,17 @@ setInterval(() => {
     updateHistory();
     renderCollection();
 
-    if (results.some(r => r.rank === 'S')) {
+    if (hasBans) {
+      showToast('⚠️ Banning Mode Active: Pulls are shown but NOT saved to collection/inventory.', 'warn');
+    }
+
+    if (pullAnimationEnabled && results.some(r => r.rank === 'S')) {
       const flash = document.createElement('div');
       flash.className = 's-rank-flash';
       document.body.appendChild(flash);
       setTimeout(() => flash.remove(), 1500);
     }
-    
+
     const area = document.getElementById('result-area');
     if (actual === 1) {
       showSingleResult(area, results[0]);
@@ -8287,13 +8348,16 @@ setInterval(() => {
       showMultiResult(area, results);
     }
     
-    btns.forEach(b => b.disabled = false);
+    setTimeout(() => btns.forEach(b => b.disabled = false), 600);
   };
 
   loadHistory();
   renderInventorySlots();
   loadCollection();
   renderCollection();
+
+  // Expose collection internals so other scripts can access them
+  window._collectionAPI = { entryKey, collectionCounts, saveCollection, renderCollection, loadCollection, loadHistory };
 })();
 </script>
 <script id="phase3-enhancements">
@@ -8466,7 +8530,7 @@ setInterval(() => {
     try {
       localStorage.setItem('gist-id', document.getElementById('gist-id-input').value);
       localStorage.setItem('gist-file', filename);
-      if (token) sessionStorage.setItem('gist-token', token);
+      if (token) localStorage.setItem('gist-token', token);
     } catch (err) {}
     return loaded;
   }
@@ -8598,16 +8662,15 @@ setInterval(() => {
 </script>
 <script id="collection-refinement">
 (function() {
-    // Override updateCollection to track counts (use collectionCounts, not collection)
+    // Override updateCollection to track counts via the phase2 collection API
     window.updateCollection = function(item) {
-        const key = entryKey(item);
-        collectionCounts[key] = (collectionCounts[key] || 0) + 1;
-        saveCollection();
-        renderCollection();
+        const api = window._collectionAPI;
+        if (!api) return;
+        const key = api.entryKey(item);
+        api.collectionCounts[key] = (api.collectionCounts[key] || 0) + 1;
+        api.saveCollection();
+        api.renderCollection();
     };
-
-    // Override renderCollection to use the main renderCollection logic
-    // (The main renderCollection is already correct, so we don't need to override it)
 
     // Add CSS for the count display
     const style = document.createElement('style');
@@ -8690,7 +8753,7 @@ Enable Shadow Archive
 🚫 <span id="banned-count-display">0</span> items banned from pulls
 </div>
 <div style="color: var(--text-dim); font-size: 11px; margin-top: 6px;">
-Banned items will not appear in pulls. Click entries in MOD tab to ban/unban.
+Banned items will not appear in pulls. Use the 🚫 BAN button on entries in the Browse or Mod tab.
 </div>
 </div>
 </div>
@@ -8873,33 +8936,12 @@ async function syncFromGist() {
   btn.textContent = '⏳ SYNCING...';
   
   try {
-    const gistUrl = window.GIST_URL || 'https://gist.githubusercontent.com/YOUR_USERNAME/YOUR_GIST_ID/raw';
-    const response = await fetch(gistUrl);
-    if (!response.ok) throw new Error('Failed to fetch gist');
-    
-    const text = await response.text();
-    const lines = text.split('\n').filter(l => l.trim() && !l.startsWith('//'));
-    
-    const newEntries = [];
-    for (const line of lines) {
-      try {
-        const entry = JSON.parse(line);
-        if (entry.rank && entry.type && entry.name && entry.desc) {
-          newEntries.push(entry);
-        }
-      } catch (e) {}
-    }
-    
-    if (newEntries.length > 0) {
-      entries = newEntries;
-      btn.textContent = `✓ SYNCED (${entries.length} items)`;
-      setTimeout(() => {
-        btn.disabled = false;
-        btn.textContent = '🔄 SYNC GIST';
-      }, 2000);
-    } else {
-      throw new Error('No valid entries found in gist');
-    }
+    await gistLoad();
+    btn.textContent = `✓ SYNCED (${entries.length} items)`;
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = '🔄 SYNC GIST';
+    }, 2000);
   } catch (error) {
     console.error('Sync error:', error);
     btn.textContent = '✗ SYNC FAILED';
@@ -8958,7 +9000,7 @@ function applyCustomRates() {
 // Reset rates to default
 function resetRatesToDefault() {
   RATES = JSON.parse(JSON.stringify(DEFAULT_RATES));
-  resetRates();
+  localStorage.removeItem(RATES_STORAGE_KEY);
   loadRatesToEditor();
   updateRatesDisplay();
   
@@ -9002,10 +9044,13 @@ function playP5RSound(type) {
 const VAULT_KEY = 'gacha-vault';
 let vault = {};
 
- catch (e) {
-      console.error('Failed to load vault:', e);
-      vault = {};
-    }
+function loadVault() {
+  try {
+    const saved = localStorage.getItem(VAULT_KEY);
+    if (saved) vault = JSON.parse(saved);
+  } catch (e) {
+    console.error('Failed to load vault:', e);
+    vault = {};
   }
 }
 
@@ -9031,18 +9076,28 @@ function addToVault(entry) {
   saveVault();
 }
 
-
-  
+function renderVault() {
+  const grid = document.getElementById('vault-grid');
+  const empty = document.getElementById('vault-empty');
+  if (!grid || !empty) return;
+  const items = Object.values(vault).sort((a, b) => RANKS.indexOf(a.rank) - RANKS.indexOf(b.rank));
+  if (items.length === 0) {
+    grid.style.display = 'none';
+    empty.style.display = 'block';
+    return;
+  }
   grid.style.display = 'grid';
   empty.style.display = 'none';
-  
   const colors = {S: '#ffd700', A: '#c084fc', B: '#34d399', C: '#60a5fa', D: '#e879f9', E: '#fb923c', F: '#94a3b8'};
-  grid.innerHTML = items.map(item => `<div class="vault-item" style="border-color: ${colors[item.rank]}80;"><div class="vault-item-rank" style="color: ${colors[item.rank]}">${item.rank}</div><div class="vault-item-name">${item.name}</div><div class="vault-item-count">×${item.count}</div></div>`).join('');
+  grid.innerHTML = items.map(item => `<div class="vault-item" style="border-color: ${colors[item.rank]}80;" onclick="openModal('${item.rank}','${escAttr(item.name)}','${escAttr(item.desc)}')"><div class="vault-item-rank" style="color: ${colors[item.rank]}">${item.rank}</div><div class="vault-item-name">${escHtml(item.name)}</div><div class="vault-item-count">×${item.count}</div></div>`).join('');
 }
 
-async ;
+async function clearVault() {
+  const ok = await showConfirm('Clear the vault? This cannot be undone.', 'Clear', 'Cancel');
+  if (ok) {
+    vault = {};
     localStorage.removeItem(VAULT_KEY);
-    
+    renderVault();
     showToast('Vault cleared.', 'warn');
   }
 }
@@ -9346,32 +9401,6 @@ window.addEventListener('beforeunload', e => {
 });
 
 
-
-  
-  document.querySelectorAll('button').forEach(btn => {
-    btn.addEventListener('mouseenter', playHoverSound);
-  });
-  
-  if (document.body.dataset.theme === 'personaMode') {
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => playP5RSound('shing'));
-    });
-  }
-});
-
-  
-  document.querySelectorAll('button').forEach(btn => {
-    btn.addEventListener('mouseenter', playHoverSound);
-  });
-  
-  if (document.body.dataset.theme === 'personaMode') {
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => playP5RSound('shing'));
-    });
-  }
-});
-
-
 // ==================== PITY DISPLAY UPDATE ====================
 function updatePityDisplay() {
   const display = document.getElementById('pity-counter-display');
@@ -9386,10 +9415,11 @@ function renderInventory() {
   if (!container) return;
   
   const inv = getCurrentInventory();
+  const RANK_ORDER = ['S','A','B','C','D','E','F'];
   const items = Object.entries(inv).map(([key, count]) => {
     const [rank, type, name] = key.split('|');
     return { rank, type, name, count };
-  });
+  }).sort((a, b) => RANK_ORDER.indexOf(a.rank) - RANK_ORDER.indexOf(b.rank));
   
   if (items.length === 0) {
     container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-dim); padding: 40px;">Your inventory is empty. Pull to add items!</div>';
@@ -9397,13 +9427,18 @@ function renderInventory() {
   }
   
   const colors = {S: '#ffd700', A: '#c084fc', B: '#34d399', C: '#60a5fa', D: '#e879f9', E: '#fb923c', F: '#94a3b8'};
-  container.innerHTML = items.map(item => `
-    <div style="background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center;">
-      <div style="font-size: 14px; font-weight: 700; color: ${colors[item.rank]}; margin-bottom: 6px;">${item.rank}</div>
-      <div style="font-size: 12px; color: var(--text); margin-bottom: 4px;">${item.name}</div>
+  container.innerHTML = items.map(item => {
+    const typeLabel = item.type === 'power' ? '⚡ Power' : '📦 Item';
+    const typeColor = item.type === 'power' ? '#93c5fd' : '#fbbf24';
+    return `<div style="background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; transition: all 0.2s;" 
+      onclick="(function(){var e=entries.find(function(x){return x.name===\'${escAttr(item.name)}\' && x.rank===\'${item.rank}\';});if(e)openModal(e.rank,e.name,e.desc);})()"
+      title="${escAttrHtml(item.name)}">
+      <div style="font-size: 14px; font-weight: 700; color: ${colors[item.rank] || '#fff'}; margin-bottom: 4px;">${item.rank}</div>
+      <div style="font-size: 10px; color: ${typeColor}; margin-bottom: 4px;">${typeLabel}</div>
+      <div style="font-size: 12px; color: var(--text); margin-bottom: 4px;">${escHtml(item.name)}</div>
       <div style="font-size: 11px; color: var(--text-dim);">×${item.count}</div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 function updateInventorySlotButtons() {
@@ -9427,8 +9462,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadSlotNames();
   loadPityCounter();
   loadWishlist();
-  loadCollection();
-  loadHistory();
+  loadVault();
   renderInventorySlots();
   
   // UI initialization
