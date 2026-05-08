@@ -940,6 +940,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 <button onclick="syncFromGist()" style="flex: 1; padding: 6px; background: #06b6d4; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">🔄 SYNC</button>
 <button onclick="forceRefreshGist()" style="flex: 1; padding: 6px; background: #ef4444; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">🔥 FORCE REFRESH</button>
 </div>
+<button onclick="cleanAndPushToGist()" style="width: 100%; padding: 8px; background: linear-gradient(135deg, #7c3aed, #4f46e5); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.2em; font-weight: 700; margin-top: 4px; box-shadow: 0 2px 10px rgba(124,58,237,0.3);">✨ CLEAN & PUSH (OVERWRITE GIST)</button>
 <div id="gist-msg" style="font-size: 10px; color: #94a3b8; padding: 6px; background: rgba(255,255,255,0.02); border-radius: 4px; border-left: 2px solid rgba(255,215,0,0.3);">Ready.</div>
 </div>
 <div class="mod-filter-bar">
@@ -3497,6 +3498,49 @@ async function syncFromGist() {
         btn.textContent = originalText;
         btn.style.color = '';
       }, 2000);
+    }
+  }
+}
+
+// The "Nuclear Option": Assigns UIDs to everything locally and OVERWRITES the Gist.
+// Use this to get rid of duplicates on the Gist once and for all.
+async function cleanAndPushToGist() {
+  const ok = await showConfirm(
+    "This will assign IDs to all local items and OVERWRITE your GitHub Gist with your current local list. Use this to permanently remove duplicates from the Gist. Continue?",
+    "Overwrite Gist",
+    "Cancel"
+  );
+  if (!ok) return;
+
+  const btn = event && event.target ? event.target : null;
+  const originalText = btn ? btn.textContent : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = '⏳ CLEANING & PUSHING...';
+  }
+
+  try {
+    // 1. Ensure everything has a UID
+    migrateEntriesToUIDs();
+    
+    // 2. Save (Overwrite) to Gist
+    const saved = await gistSave();
+    if (!saved) throw new Error("Save failed. Check your token.");
+
+    showToast("Gist cleaned and overwritten successfully!", "success");
+    if (btn) btn.textContent = '✓ GIST CLEANED';
+    setTimeout(() => {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }, 3000);
+  } catch (err) {
+    console.error(err);
+    showToast("Failed to clean Gist: " + err.message, "error");
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = originalText;
     }
   }
 }
