@@ -2069,13 +2069,13 @@ async function gistLoad() {
   
   if (!gistId) {
     gistMsg('Enter a Gist ID or URL', true);
-    return;
+    return false;
   }
   
   gistId = extractGistId(gistId);
   if (!gistId) {
     gistMsg('Invalid Gist ID or URL', true);
-    return;
+    return false;
   }
   
   try {
@@ -2112,10 +2112,12 @@ async function gistLoad() {
     }
     gistMsg('✓ Loaded ' + entries.length + ' entries');
     showToast('Loaded ' + entries.length + ' entries from Gist', 'success');
+    return true;
   } catch (e) {
     gistMsg('Error: ' + e.message, true);
     showToast('Gist load failed: ' + e.message, 'error');
     console.error(e);
+    return false;
   }
 }
 
@@ -2126,17 +2128,17 @@ async function gistSave() {
   
   if (!gistId) {
     gistMsg('Enter a Gist ID', true);
-    return;
+    return false;
   }
   if (!token) {
     gistMsg('Enter a GitHub token to save', true);
-    return;
+    return false;
   }
   
   gistId = extractGistId(gistId);
   if (!gistId) {
     gistMsg('Invalid Gist ID', true);
-    return;
+    return false;
   }
   
   try {
@@ -2163,7 +2165,7 @@ async function gistSave() {
       localStorage.setItem('gist-id', document.getElementById('gist-id-input').value);
       localStorage.setItem('gist-file', filename);
       // Token persisted to localStorage so it survives tab closes
-      sessionStorage.setItem('gist-token', token);
+      localStorage.setItem('gist-token', token);
     } catch (e) {
       console.warn('Could not save Gist settings:', e);
     }
@@ -2171,10 +2173,12 @@ async function gistSave() {
     showToast('Saved ' + entries.length + ' entries to Gist', 'success');
     unsavedChanges = false;
     document.getElementById('unsaved-dot').classList.remove('visible');
+    return true;
   } catch (e) {
     gistMsg('Error: ' + e.message, true);
     showToast('Gist save failed: ' + e.message, 'error');
     console.error(e);
+    return false;
   }
 }
 
@@ -3384,29 +3388,51 @@ function updateRatesDisplay() {
   ).join('');
 }
 
-// Sync from Gist without page reload
+// Bi-directional Sync: Merge remote changes into local, then push back to Gist.
+// This ensures you get new items from others while keeping your local edits.
 async function syncFromGist() {
-  const btn = event.target;
-  btn.disabled = true;
-  const originalText = btn.textContent;
-  btn.textContent = '⏳ SYNCING...';
+  const btn = (typeof event !== 'undefined' && event && event.target) ? event.target : null;
+  const originalText = btn ? btn.textContent : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = '⏳ MERGING...';
+  }
   
   try {
-    await gistLoad();
-    btn.textContent = `✓ SYNCED (${entries.length} items)`;
-    setTimeout(() => {
-      btn.disabled = false;
-      btn.textContent = originalText;
-    }, 2000);
+    // 1. Pull latest from Gist and merge into local 'entries'
+    // We use the existing gistMerge logic but wrapped for the sync button
+    if (typeof gistMerge !== 'function') {
+      // Fallback if gistMerge isn't available in the current scope
+      await gistLoad(); 
+    } else {
+      await gistMerge();
+    }
+    
+    // 2. Push the merged result back to Gist
+    if (btn) btn.textContent = '⏳ PUSHING...';
+    const saved = await gistSave();
+    if (!saved) throw new Error('Merge succeeded but push to Gist failed.');
+    
+    if (btn) {
+      btn.textContent = `✓ SYNCED (${entries.length} items)`;
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }, 2000);
+    }
   } catch (error) {
     console.error('Sync error:', error);
-    btn.textContent = '✗ SYNC FAILED';
-    btn.style.color = '#f87171';
-    setTimeout(() => {
-      btn.disabled = false;
-      btn.textContent = originalText;
-      btn.style.color = '';
-    }, 2000);
+    gistMsg('Sync failed: ' + error.message, true);
+    showToast('Sync failed: ' + error.message, 'error');
+    if (btn) {
+      btn.textContent = '✗ SYNC FAILED';
+      btn.style.color = '#f87171';
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.textContent = originalText;
+        btn.style.color = '';
+      }, 2000);
+    }
   }
 }
 
