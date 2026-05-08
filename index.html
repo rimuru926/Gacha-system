@@ -2370,8 +2370,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.2); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
 <div style="font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.2em; color: #ffd700; margin-bottom: 12px; font-weight: 700;">⚙ GIST SYNC</div>
 <div style="display: grid; gap: 8px; margin-bottom: 12px;">
-<input id="gist-id-input" placeholder="Gist ID or full URL" style="width: 100%; padding: 6px; background: #0e0e18; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #e2e8f0; font-family: monospace; font-size: 11px;" type="text" value="1fe8dbbd7b41c48bbfd28bcfbaaf1b0e"/>
-<input id="gist-file-input" placeholder="File name (default: fateforge_entries.json)" style="width: 100%; padding: 6px; background: #0e0e18; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #e2e8f0; font-family: monospace; font-size: 11px;" type="text" value="fateforge_entries.json"/>
+<input id="gist-id-input" placeholder="Gist ID or full URL" style="width: 100%; padding: 6px; background: #0e0e18; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #e2e8f0; font-family: monospace; font-size: 11px;" type="text" value="2b3d7d3272eb9dd958f14186799014e8"/>
+<input id="gist-file-input" placeholder="File name (default: entries.json)" style="width: 100%; padding: 6px; background: #0e0e18; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #e2e8f0; font-family: monospace; font-size: 11px;" type="text" value="entries.json"/>
 <input id="gist-token-input" placeholder="GitHub token (for saving)" style="width: 100%; padding: 6px; background: #0e0e18; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #e2e8f0; font-family: monospace; font-size: 11px;" type="password"/>
 <div style="font-size: 10px; color: #64748b; margin-top: 2px; font-family: 'Cinzel', serif; letter-spacing: 0.05em;">🔒 Token stored in localStorage and pre-filled automatically on reload</div>
 </div>
@@ -2379,6 +2379,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 <button onclick="gistLoad()" style="flex: 1; padding: 6px; background: #4f46e5; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">LOAD</button>
 <button onclick="gistSave()" style="flex: 1; padding: 6px; background: #059669; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">SAVE</button>
 <button onclick="syncFromGist()" style="flex: 1; padding: 6px; background: #06b6d4; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">🔄 SYNC</button>
+<button onclick="forceRefreshGist()" style="flex: 1; padding: 6px; background: #ef4444; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">🔥 FORCE REFRESH</button>
 </div>
 <div id="gist-msg" style="font-size: 10px; color: #94a3b8; padding: 6px; background: rgba(255,255,255,0.02); border-radius: 4px; border-left: 2px solid rgba(255,215,0,0.3);">Ready.</div>
 </div>
@@ -6736,8 +6737,8 @@ const MOD_PASSWORD = 'cheesy';
 
 // ==================== PUBLIC GIST (auto-load) ====================
 // This Gist is fetched anonymously on every page load.
-// File expected: fateforge_entries.json
-const PUBLIC_GIST_ID = '1fe8dbbd7b41c48bbfd28bcfbaaf1b0e';
+// File expected: entries.json
+const PUBLIC_GIST_ID = '2b3d7d3272eb9dd958f14186799014e8';
 
 // Live data store — initialised from baked-in DOM, then overwritten by Gist
 let entries = [];
@@ -7629,7 +7630,7 @@ function gistMsg(text, err = false) {
 
 async function gistLoad() {
   let gistId = document.getElementById('gist-id-input').value.trim();
-  const filename = document.getElementById('gist-file-input').value.trim() || 'fateforge_entries.json';
+  const filename = document.getElementById('gist-file-input').value.trim() || 'entries.json';
   const token = document.getElementById('gist-token-input').value.trim();
   
   if (!gistId) {
@@ -7686,7 +7687,7 @@ async function gistLoad() {
 
 async function gistSave() {
   let gistId = document.getElementById('gist-id-input').value.trim();
-  const filename = document.getElementById('gist-file-input').value.trim() || 'fateforge_entries.json';
+  const filename = document.getElementById('gist-file-input').value.trim() || 'entries.json';
   const token = document.getElementById('gist-token-input').value.trim();
   
   if (!gistId) {
@@ -7747,7 +7748,7 @@ async function gistSave() {
 (function() {
   try {
     const id    = localStorage.getItem('gist-id')   || PUBLIC_GIST_ID;
-    const file  = localStorage.getItem('gist-file') || 'fateforge_entries.json';
+    const file  = localStorage.getItem('gist-file') || 'entries.json';
     const token = localStorage.getItem('gist-token') || sessionStorage.getItem('gist-token');
     document.getElementById('gist-id-input').value   = id;
     document.getElementById('gist-file-input').value = file;
@@ -7771,7 +7772,7 @@ async function gistSave() {
           const resp = await fetch('https://api.github.com/gists/' + gistId);
           if (resp.ok) {
             const gist = await resp.json();
-            const filename = params.get('file') || 'fateforge_entries.json';
+            const filename = params.get('file') || 'entries.json';
             const file = gist.files[filename];
             if (file) {
               const content = file.truncated
@@ -7889,7 +7890,7 @@ function showStats() {
 
 // Gist creation helper
 function showGistHelper() {
-  showToast('Gist ID pre-filled. Add fateforge_entries.json to your Gist, then click LOAD. For saving, add a GitHub PAT with "gist" scope.', 'info', 7000);
+  showToast('Gist ID pre-filled. Add entries.json to your Gist, then click LOAD. For saving, add a GitHub PAT with "gist" scope.', 'info', 7000);
 }
 
 // Add backup/restore/stats buttons to mod panel
@@ -7948,7 +7949,7 @@ setInterval(() => {
 }, 30000);
 
 // ==================== AUTO-LOAD FROM PUBLIC GIST ====================
-// Fetches fateforge_entries.json from the public Gist on every page load.
+// Fetches entries.json from the public Gist on every page load.
 // Falls back to localStorage autosave, then baked-in DOM entries.
 (async function autoLoadFromGist() {
   // First: restore from localStorage autosave if entries are still empty
@@ -7970,8 +7971,8 @@ setInterval(() => {
     const resp = await fetch(`https://api.github.com/gists/${PUBLIC_GIST_ID}`, { headers });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const gist = await resp.json();
-    const file = gist.files['fateforge_entries.json'];
-    if (!file) throw new Error('fateforge_entries.json not found in Gist');
+    const file = gist.files['entries.json'];
+    if (!file) throw new Error('entries.json not found in Gist');
     const content = file.truncated ? await (await fetch(file.raw_url)).text() : file.content;
     const data   = JSON.parse(content);
     const loaded = Array.isArray(data) ? data : (data.entries || []);
@@ -8506,7 +8507,7 @@ setInterval(() => {
 
   async function fetchGistEntries() {
     let gistId = document.getElementById('gist-id-input').value.trim();
-    const filename = document.getElementById('gist-file-input').value.trim() || 'fateforge_entries.json';
+    const filename = document.getElementById('gist-file-input').value.trim() || 'entries.json';
     const token = document.getElementById('gist-token-input').value.trim();
     if (!gistId) throw new Error('Enter a Gist ID or URL');
     gistId = extractGistId(gistId);
@@ -8935,6 +8936,7 @@ function updateRatesDisplay() {
 async function syncFromGist() {
   const btn = event.target;
   btn.disabled = true;
+  const originalText = btn.textContent;
   btn.textContent = '⏳ SYNCING...';
   
   try {
@@ -8942,7 +8944,7 @@ async function syncFromGist() {
     btn.textContent = `✓ SYNCED (${entries.length} items)`;
     setTimeout(() => {
       btn.disabled = false;
-      btn.textContent = '🔄 SYNC GIST';
+      btn.textContent = originalText;
     }, 2000);
   } catch (error) {
     console.error('Sync error:', error);
@@ -8950,8 +8952,47 @@ async function syncFromGist() {
     btn.style.color = '#f87171';
     setTimeout(() => {
       btn.disabled = false;
-      btn.textContent = '🔄 SYNC GIST';
-      btn.style.color = '#60a5fa';
+      btn.textContent = originalText;
+      btn.style.color = '';
+    }, 2000);
+  }
+}
+
+async function forceRefreshGist() {
+  const btn = event.target;
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = '⏳ REFRESHING...';
+  
+  try {
+    // Clear cache by adding a timestamp to the fetch URL in gistLoad
+    // We'll temporarily override the fetch to ensure no cache
+    const originalFetch = window.fetch;
+    window.fetch = (url, options) => {
+      if (typeof url === 'string' && url.includes('api.github.com/gists/')) {
+        const separator = url.includes('?') ? '&' : '?';
+        url = `${url}${separator}t=${Date.now()}`;
+      }
+      return originalFetch(url, { ...options, cache: 'no-store' });
+    };
+    
+    await gistLoad();
+    
+    // Restore original fetch
+    window.fetch = originalFetch;
+    
+    btn.textContent = `✓ REFRESHED (${entries.length} items)`;
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }, 2000);
+  } catch (error) {
+    window.fetch = originalFetch;
+    console.error('Refresh error:', error);
+    btn.textContent = '✗ REFRESH FAILED';
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = originalText;
     }, 2000);
   }
 }
