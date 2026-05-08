@@ -1189,6 +1189,16 @@ function setPityEnabled(enabled) {
 
 loadPityCounter();
 
+// ==================== EVOLUTION NOTIFICATION SETTING ====================
+const EVO_NOTIF_KEY = 'gacha-evo-notif-enabled';
+let evoNotifEnabled = localStorage.getItem(EVO_NOTIF_KEY) !== 'false'; // default: ON
+function setEvoNotif(enabled) {
+  evoNotifEnabled = enabled;
+  localStorage.setItem(EVO_NOTIF_KEY, enabled.toString());
+  const toggle = document.getElementById('evo-notif-toggle');
+  if (toggle) toggle.checked = enabled;
+}
+
 // ==================== EVOLUTION & INVENTORY SYSTEM ====================
 const INVENTORY_KEY = 'gacha-inventory';
 const INVENTORY_SLOTS_KEY = 'gacha-inventory-slots';
@@ -1407,7 +1417,14 @@ function addToInventory(entry) {
     const evolvedEntry = entries.find(e => e.name === evoName);
     if (evolvedEntry) {
       delete inv[key];
-      showToast(`Evolution! ${entry.name} upgraded to ${evoName}`, 'success');
+      // Only show the evolution toast if:
+      //   1. The global evo notification setting is enabled, AND
+      //   2. The player does NOT already own the evolved form
+      const evolvedKey = `${evolvedEntry.rank}|${evolvedEntry.type}|${evolvedEntry.name}`;
+      const alreadyOwnsEvolution = !!inv[evolvedKey];
+      if (evoNotifEnabled && !alreadyOwnsEvolution) {
+        showToast(`Evolution! ${entry.name} upgraded to ${evoName}`, 'success');
+      }
       addToInventory(evolvedEntry);
       return;
     }
@@ -3310,6 +3327,24 @@ Banned items will not appear in pulls. Use the 🚫 BAN button on entries in the
 </div>
 </div>
 </div>
+<div class="rank-section">
+<div class="rank-header">
+<span class="rank-title">Evolution Notifications</span>
+</div>
+<div class="rank-content" style="display:grid;gap:14px;">
+<label class="form-label" style="margin-bottom:0;">Show evolution upgrade notifications</label>
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+<input type="checkbox" id="evo-notif-toggle" onchange="setEvoNotif(this.checked)" />
+<span style="color:#94a3b8;font-size:13px;">On by default. When enabled, a toast notification appears whenever a duplicate pull triggers an evolution upgrade.</span>
+</div>
+<div style="margin-top:12px;padding:12px;background:rgba(255,255,255,0.05);border-radius:6px;border-left:3px solid rgba(255,215,0,0.5);">
+<div style="color:var(--text-dim);font-size:11px;line-height:1.6;">
+<strong>Note:</strong> Even when enabled, the notification is automatically suppressed if you already own the evolved form — no duplicate alerts.
+</div>
+</div>
+</div>
+</div>
+</div>
 
 <script>
 // ==================== ENHANCEMENT FUNCTIONS ====================
@@ -3938,6 +3973,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const pityToggle = document.getElementById('pity-toggle');
   if (pityToggle) pityToggle.checked = pityEnabled;
   updatePityDisplay();
+
+  // Evo notification UI
+  const evoNotifToggle = document.getElementById('evo-notif-toggle');
+  if (evoNotifToggle) evoNotifToggle.checked = evoNotifEnabled;
   
   // Event listeners
   document.querySelectorAll('.pull-btn').forEach(btn => {
