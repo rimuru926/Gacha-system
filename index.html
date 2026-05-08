@@ -570,10 +570,11 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 
 /* Visual Impact Effects */
 @keyframes starFall {
-  0% { transform: translate(0, -20vh) rotate(var(--angle, 45deg)) scale(0); opacity: 0; }
+  0% { transform: translate(0, -30vh) rotate(var(--angle, 25deg)) scale(0); opacity: 0; }
   10% { opacity: 0.7; scale: 1; }
   90% { opacity: 0.7; }
-  100% { transform: translate(var(--dist-x, -120vw), var(--dist-y, 100vh)) rotate(var(--angle, 45deg)) scale(1); opacity: 0; }
+  /* Vertical bias: travel further down than across to ensure bottom-exit */
+  100% { transform: translate(var(--dist-x, -30vw), var(--dist-y, 130vh)) rotate(var(--angle, 25deg)) scale(1); opacity: 0; }
 }
 .floating-shards {
   position: fixed;
@@ -3664,33 +3665,31 @@ function updateWishlistDisplay() {
 function initFloatingShards() {
   const container = document.getElementById('floating-shards');
   if (!container) return;
-  // Create 45 falling stars for a denser, layered effect
+  // Create 45 falling stars
   for (let i = 0; i < 45; i++) {
     const star = document.createElement('div');
     star.className = 'shard';
     
-    // Randomize starting positions
-    star.style.left = (Math.random() * 160) - 30 + '%'; 
-    star.style.top = (Math.random() * 100) - 60 + '%';
+    // Start them mostly from the top and right to allow for diagonal fall
+    star.style.left = (Math.random() * 120) - 10 + '%'; 
+    star.style.top = (Math.random() * 100) - 80 + '%';
     
-    // Physics: Randomize fall angle (35deg to 55deg)
-    const angle = 35 + Math.random() * 20;
+    // Physics: More vertical angles (15deg to 35deg) to favor bottom-exit
+    const angle = 15 + Math.random() * 20;
     star.style.setProperty('--angle', angle + 'deg');
     
-    // Physics: Randomize distance to create depth
-    const distX = -100 - (Math.random() * 50);
-    const distY = 80 + (Math.random() * 40);
+    // Physics: Distances that favor downward travel
+    const distX = -20 - (Math.random() * 30); // Less horizontal travel
+    const distY = 120 + (Math.random() * 30); // More vertical travel
     star.style.setProperty('--dist-x', distX + 'vw');
     star.style.setProperty('--dist-y', distY + 'vh');
     
-    // Physics: Vary duration (2s to 5s) and delay
-    const duration = 2 + Math.random() * 3;
-    const delay = Math.random() * 12;
+    const duration = 2.5 + Math.random() * 3.5;
+    const delay = Math.random() * 15;
     star.style.animationDuration = duration + 's';
     star.style.animationDelay = delay + 's';
     
-    // Visuals: Randomize scale and slight opacity for depth
-    const scale = 0.4 + Math.random() * 0.9;
+    const scale = 0.4 + Math.random() * 0.8;
     star.style.opacity = 0.3 + Math.random() * 0.4;
     star.style.transform = `rotate(${angle}deg) scale(${scale})`;
     
