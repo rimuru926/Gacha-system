@@ -1123,6 +1123,22 @@ const PUBLIC_GIST_ID = '2b3d7d3272eb9dd958f14186799014e8';
 // Live data store — initialised from baked-in DOM, then overwritten by Gist
 let entries = [];
 
+// UID System: Ensures entries can be tracked even if Name/Rank/Type changes.
+function generateUID() {
+  return 'uid-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+}
+
+function migrateEntriesToUIDs() {
+  let migrated = 0;
+  entries.forEach(e => {
+    if (!e.uid) {
+      e.uid = generateUID();
+      migrated++;
+    }
+  });
+  if (migrated > 0) console.log(`Migrated ${migrated} entries to UIDs.`);
+}
+
 
 
 let pullHistory = [];
@@ -1801,9 +1817,13 @@ function submitEntry() {
   }
 
   if (editingIndex !== null) {
+    // Preserve the existing UID when editing
+    entry.uid = entries[editingIndex].uid || generateUID();
     entries[editingIndex] = entry;
     showToast('Entry updated.', 'success');
   } else {
+    // Assign a new UID for new entries
+    entry.uid = generateUID();
     entries.push(entry);
     showToast('Entry added.', 'success');
   }
@@ -2976,33 +2996,78 @@ setInterval(() => {
     return loaded;
   }
 
-  function mergeSignature(entry) {
-    return [String(entry.rank || '').trim().toUpperCase(), String(entry.type || '').trim().toLowerCase(), String(entry.name || '').trim().toLowerCase().replace(/\s+/g, ' ')].join('|');
+  // UID-based Merge: The ultimate fix for duplicates.
+  // 1. Match by UID (stable across name/rank changes)
+  // 2. Fallback to Name (for entries coming from older versions/other users)
+  function getMergeKeys(entry) {
+    return {
+      uid: entry.uid || null,
+      name: String(entry.name || '').trim().toLowerCase().replace(/\s+/g, ' ')
+    };
   }
 
   window.gistMerge = async function gistMerge() {
     try {
       gistMsg('Merging...');
       const loaded = await fetchGistEntries();
-      const existingKeys = new Set(entries.map(mergeSignature));
-      let added = 0;
-      let skipped = 0;
-      loaded.forEach(entry => {
-        const key = mergeSignature(entry);
-        if (existingKeys.has(key)) {
-          skipped += 1;
-          return;
-        }
-        existingKeys.add(key);
-        entries.push({ rank: entry.rank, type: entry.type, name: entry.name, desc: entry.desc });
-        added += 1;
+      
+      // Ensure all local entries have UIDs before merging
+      migrateEntriesToUIDs();
+
+      const localUidMap = new Map();
+      const localNameMap = new Map();
+      
+      entries.forEach((e, idx) => {
+        if (e.uid) localUidMap.set(e.uid, { entry: e, index: idx });
+        localNameMap.set(getMergeKeys(e).name, { entry: e, index: idx });
       });
+
+      let added = 0;
+      let updated = 0;
+      let skipped = 0;
+
+      loaded.forEach(remoteEntry => {
+        const keys = getMergeKeys(remoteEntry);
+        // Try matching by UID first, then by Name
+        const local = (keys.uid ? localUidMap.get(keys.uid) : null) || localNameMap.get(keys.name);
+
+        if (local) {
+          // Entry exists locally.
+          // If it didn't have a UID but the remote one does, adopt it.
+          if (!local.entry.uid && remoteEntry.uid) {
+            local.entry.uid = remoteEntry.uid;
+          }
+          
+          let changed = false;
+          for (const field in remoteEntry) {
+            // Only fill in fields that are missing locally.
+            // This ensures local edits (Name, Rank, Evo) are PRESERVED.
+            if (local.entry[field] === undefined) {
+              local.entry[field] = remoteEntry[field];
+              changed = true;
+            }
+          }
+          if (changed) updated++;
+          else skipped++;
+        } else {
+          // Truly new entry
+          const newEntry = { ...remoteEntry };
+          if (!newEntry.uid) newEntry.uid = generateUID();
+          entries.push(newEntry);
+          added++;
+        }
+      });
+
       if(typeof rebuildBrowse === 'function') rebuildBrowse();
       if(typeof renderModTable === 'function') renderModTable();
-      gistMsg('Merge complete: ' + added + ' added, ' + skipped + ' skipped as duplicates.');
+      
+      const msg = `Merge: ${added} added, ${updated} updated, ${skipped} kept local.`;
+      gistMsg(msg);
+      console.log(msg);
     } catch (err) {
       gistMsg('Error: ' + err.message, true);
       console.error(err);
+      throw err; // Re-throw so syncFromGist knows it failed
     }
   };
 })();
