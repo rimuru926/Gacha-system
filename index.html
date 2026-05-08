@@ -569,11 +569,12 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 }
 
 /* Visual Impact Effects */
-@keyframes shardFloat {
-  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.1; }
-  50% { transform: translateY(-20px) rotate(180deg); opacity: 0.3; }
+@keyframes starFall {
+  0% { transform: translate(0, -10vh) rotate(-45deg) scale(0); opacity: 0; }
+  10% { opacity: 1; scale: 1; }
+  90% { opacity: 1; }
+  100% { transform: translate(-100vw, 90vh) rotate(-45deg) scale(1); opacity: 0; }
 }
-
 .floating-shards {
   position: fixed;
   top: 0;
@@ -581,15 +582,17 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 1;
+  z-index: 0; /* Behind everything */
+  overflow: hidden;
 }
-
 .shard {
   position: absolute;
   width: 2px;
-  height: 20px;
-  background: linear-gradient(135deg, rgba(255,0,0,0.5), rgba(255,255,0,0.5));
-  animation: shardFloat 8s infinite;
+  height: 100px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.8), transparent);
+  filter: drop-shadow(0 0 5px #fff);
+  animation: starFall 4s linear infinite;
+  opacity: 0;
 }
 
 @keyframes screenInvert {
@@ -3660,14 +3663,25 @@ function updateWishlistDisplay() {
 function initFloatingShards() {
   const container = document.getElementById('floating-shards');
   if (!container) return;
-  for (let i = 0; i < 15; i++) {
-    const shard = document.createElement('div');
-    shard.className = 'shard';
-    shard.style.left = Math.random() * 100 + '%';
-    shard.style.top = Math.random() * 100 + '%';
-    shard.style.animationDelay = Math.random() * 8 + 's';
-    shard.style.animationDuration = (6 + Math.random() * 4) + 's';
-    container.appendChild(shard);
+  // Create 40 falling stars for a denser, continuous effect
+  for (let i = 0; i < 40; i++) {
+    const star = document.createElement('div');
+    star.className = 'shard';
+    // Randomize starting positions across the top and right side to fill the diagonal flow
+    star.style.left = (Math.random() * 150) - 25 + '%'; 
+    star.style.top = (Math.random() * 100) - 50 + '%';
+    
+    // Randomize speed and delay for natural variance
+    const duration = 2 + Math.random() * 4;
+    const delay = Math.random() * 10;
+    star.style.animationDuration = duration + 's';
+    star.style.animationDelay = delay + 's';
+    
+    // Randomize size slightly
+    const scale = 0.5 + Math.random() * 0.8;
+    star.style.transform = `scale(${scale})`;
+    
+    container.appendChild(star);
   }
 }
 
