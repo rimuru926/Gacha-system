@@ -18,7 +18,7 @@
 html { scroll-behavior: smooth; }
 body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Georgia, serif; font-size: 16px; line-height: 1.6; min-height: 100vh; }
 
-.site-header { background: linear-gradient(180deg, #000 0%, var(--bg) 100%); border-bottom: 1px solid rgba(255,215,0,0.2); padding: 40px 24px 32px; text-align: center; position: relative; overflow: hidden; }
+.site-header { background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(8,8,16,0.8) 100%); border-bottom: 1px solid rgba(255,215,0,0.2); padding: 40px 24px 32px; text-align: center; position: relative; overflow: hidden; }
 .site-header::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(255,215,0,0.06) 0%, transparent 70%); pointer-events: none; }
 .site-title { font-family: 'Cinzel', serif; font-size: clamp(2rem, 6vw, 4rem); font-weight: 900; letter-spacing: 0.15em; color: #fff; text-shadow: 0 0 40px rgba(255,215,0,0.4), 0 2px 4px rgba(0,0,0,0.8); margin-bottom: 8px; }
 .site-subtitle { font-family: 'Cinzel', serif; font-size: 0.85rem; letter-spacing: 0.4em; color: rgba(255,215,0,0.6); }
@@ -31,7 +31,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 .tab-content.active { display: block; }
 
 /* PULL TAB */
-.gacha-section { background: linear-gradient(180deg, #050508 0%, #0a0a14 100%); border-bottom: 1px solid rgba(255,215,0,0.15); padding: 40px 24px; text-align: center; position: relative; overflow: hidden; }
+.gacha-section { background: linear-gradient(180deg, rgba(5,5,8,0.7) 0%, rgba(10,10,20,0.7) 100%); border-bottom: 1px solid rgba(255,215,0,0.15); padding: 40px 24px; text-align: center; position: relative; overflow: hidden; }
 .gacha-section::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 100%, rgba(120,80,255,0.06) 0%, transparent 70%); pointer-events: none; }
 .gacha-title { font-family: 'Cinzel', serif; font-size: 1.1rem; letter-spacing: 0.35em; color: rgba(255,215,0,0.5); text-transform: uppercase; margin-bottom: 32px; }
 
@@ -570,10 +570,10 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 
 /* Visual Impact Effects */
 @keyframes starFall {
-  0% { transform: translate(0, -10vh) rotate(-45deg) scale(0); opacity: 0; }
-  10% { opacity: 1; scale: 1; }
-  90% { opacity: 1; }
-  100% { transform: translate(-100vw, 90vh) rotate(-45deg) scale(1); opacity: 0; }
+  0% { transform: translate(0, -20vh) rotate(-45deg) scale(0); opacity: 0; }
+  10% { opacity: 0.6; scale: 1; }
+  90% { opacity: 0.6; }
+  100% { transform: translate(-120vw, 100vh) rotate(-45deg) scale(1); opacity: 0; }
 }
 .floating-shards {
   position: fixed;
@@ -582,15 +582,15 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 0; /* Behind everything */
+  z-index: 1; /* Above backgrounds, below content */
   overflow: hidden;
 }
 .shard {
   position: absolute;
   width: 2px;
-  height: 100px;
-  background: linear-gradient(to bottom, rgba(255,255,255,0.8), transparent);
-  filter: drop-shadow(0 0 5px #fff);
+  height: 120px;
+  background: linear-gradient(to bottom, rgba(255,0,0,0.6), rgba(255,215,0,0.6), transparent);
+  filter: drop-shadow(0 0 8px rgba(255,69,0,0.4));
   animation: starFall 4s linear infinite;
   opacity: 0;
 }
