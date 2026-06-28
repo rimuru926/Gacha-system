@@ -1832,6 +1832,19 @@ function submitEntry() {
   closeFormModal();
   if(typeof renderModTable === 'function') renderModTable();
   if(typeof rebuildBrowse === 'function') rebuildBrowse();
+  // Auto-save to Gist if a token is available
+  autoGistSave();
+}
+
+async function autoGistSave() {
+  const token = document.getElementById('gist-token-input')?.value?.trim()
+    || localStorage.getItem('gist-token') || '';
+  const gistId = document.getElementById('gist-id-input')?.value?.trim() || '';
+  if (!token || !gistId) return; // silently skip if not configured
+  const saved = await gistSave();
+  if (saved) {
+    markSaved();
+  }
 }
 
 async function deleteEntry(idx) {
@@ -1842,6 +1855,8 @@ async function deleteEntry(idx) {
   showToast('Entry deleted.', 'warn');
   if(typeof renderModTable === 'function') renderModTable();
   if(typeof rebuildBrowse === 'function') rebuildBrowse();
+  // Auto-save to Gist if a token is available
+  autoGistSave();
 }
 
 // ==================== BAN ENTRY FUNCTION ====================
