@@ -919,29 +919,43 @@ body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Ge
 <button class="mod-btn mod-btn-logout" onclick="modLogout()">LOCK</button>
 </div>
 <div id="smart-buttons-added" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
+<button onclick="hardRefreshAll()" style="padding: 6px 12px; background: #ef4444; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">🔄 REFRESH</button>
 <button onclick="backupEntries()" style="padding: 6px 12px; background: #7c3aed; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">💾 BACKUP</button>
 <button onclick="restoreEntries()" style="padding: 6px 12px; background: #4f46e5; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">↩ RESTORE</button>
 <button onclick="findDuplicates()" style="padding: 6px 12px; background: #d97706; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">🔍 DUPES</button>
 <button onclick="showStats()" style="padding: 6px 12px; background: #059669; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">📊 STATS</button>
-<button onclick="showGistHelper()" style="padding: 6px 12px; background: #6366f1; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">❓ GIST HELP</button>
 </div></div>
-<!-- GitHub Gist Sync Section -->
-<div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.2); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
-<div style="font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.2em; color: #ffd700; margin-bottom: 12px; font-weight: 700;">⚙ GIST SYNC</div>
-<div style="display: grid; gap: 8px; margin-bottom: 12px;">
-<input id="gist-id-input" placeholder="Gist ID or full URL" style="width: 100%; padding: 6px; background: #0e0e18; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #e2e8f0; font-family: monospace; font-size: 11px;" type="text" value="2b3d7d3272eb9dd958f14186799014e8"/>
-<input id="gist-file-input" placeholder="File name (default: entries.json)" style="width: 100%; padding: 6px; background: #0e0e18; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #e2e8f0; font-family: monospace; font-size: 11px;" type="text" value="entries.json"/>
-<input id="gist-token-input" placeholder="GitHub token (for saving)" style="width: 100%; padding: 6px; background: #0e0e18; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #e2e8f0; font-family: monospace; font-size: 11px;" type="password"/>
-<div style="font-size: 10px; color: #64748b; margin-top: 2px; font-family: 'Cinzel', serif; letter-spacing: 0.05em;">🔒 Token stored in localStorage and pre-filled automatically on reload</div>
+<!-- Gist Connection (hidden inputs kept for JS compatibility, visible connection card) -->
+<input id="gist-id-input" type="hidden" value="2b3d7d3272eb9dd958f14186799014e8"/>
+<input id="gist-file-input" type="hidden" value="entries.json"/>
+<input id="gist-token-input" type="hidden"/>
+<div id="gist-connect-card" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.15); border-radius: 8px; padding: 14px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+  <div style="flex: 1; min-width: 200px;">
+    <div style="font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.2em; color: #ffd700; margin-bottom: 6px;">🔗 GIST CONNECTION</div>
+    <div id="gist-status-line" style="font-size: 11px; color: #94a3b8; font-family: 'Cinzel', serif;">Not connected — enter a GitHub token to enable auto-save</div>
+  </div>
+  <button onclick="openGistSetup()" style="padding: 7px 16px; background: rgba(255,215,0,0.12); border: 1px solid rgba(255,215,0,0.35); color: #ffd700; border-radius: 6px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; white-space: nowrap;">⚙ CONFIGURE</button>
 </div>
-<div style="display: flex; gap: 8px; margin-bottom: 8px;">
-<button onclick="gistLoad()" style="flex: 1; padding: 6px; background: #4f46e5; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">LOAD</button>
-<button onclick="gistSave()" style="flex: 1; padding: 6px; background: #059669; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">SAVE</button>
-<button onclick="syncFromGist()" style="flex: 1; padding: 6px; background: #06b6d4; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">🔄 SYNC</button>
-<button onclick="forceRefreshGist()" style="flex: 1; padding: 6px; background: #ef4444; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">🔥 FORCE REFRESH</button>
-</div>
-<button onclick="cleanAndPushToGist()" style="width: 100%; padding: 8px; background: linear-gradient(135deg, #7c3aed, #4f46e5); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.2em; font-weight: 700; margin-top: 4px; box-shadow: 0 2px 10px rgba(124,58,237,0.3);">✨ CLEAN & PUSH (OVERWRITE GIST)</button>
-<div id="gist-msg" style="font-size: 10px; color: #94a3b8; padding: 6px; background: rgba(255,255,255,0.02); border-radius: 4px; border-left: 2px solid rgba(255,215,0,0.3);">Ready.</div>
+<!-- Gist setup modal (shown on demand) -->
+<div id="gist-setup-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(4px); z-index:2000; align-items:center; justify-content:center; padding:24px;">
+  <div style="background: var(--surface); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; max-width: 480px; width: 100%; padding: 28px; position: relative;">
+    <button onclick="closeGistSetup()" style="position:absolute;top:14px;right:14px;background:none;border:none;color:var(--text-dim);font-size:18px;cursor:pointer;">✕</button>
+    <div style="font-family:'Cinzel',serif;font-size:1rem;letter-spacing:0.2em;color:#ffd700;margin-bottom:20px;">🔗 GIST SETUP</div>
+    <div style="margin-bottom:12px;">
+      <label style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.2em;color:var(--text-dim);display:block;margin-bottom:6px;">GIST ID OR URL</label>
+      <input id="gist-id-visible" placeholder="e.g. 2b3d7d3272eb9dd958f14186799014e8" style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:monospace;font-size:12px;outline:none;" type="text"/>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.2em;color:var(--text-dim);display:block;margin-bottom:6px;">GITHUB TOKEN <span style="opacity:0.5;">(for auto-save)</span></label>
+      <input id="gist-token-visible" placeholder="ghp_..." style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:monospace;font-size:12px;outline:none;" type="password"/>
+      <div style="font-size:10px;color:#64748b;margin-top:5px;font-family:'Cinzel',serif;">🔒 Saved to browser — never leaves your device</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:20px;">
+      <button onclick="saveGistSetup()" style="flex:1;padding:10px;background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:7px;cursor:pointer;font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:0.15em;">SAVE & CONNECT</button>
+      <button onclick="closeGistSetup()" style="padding:10px 18px;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text-dim);border-radius:7px;cursor:pointer;font-family:'Cinzel',serif;font-size:11px;">CANCEL</button>
+    </div>
+    <div id="gist-msg" style="font-size:10px;color:#94a3b8;padding:8px 0 0;font-family:'Cinzel',serif;display:none;"></div>
+  </div>
 </div>
 <div class="mod-filter-bar">
 <select id="mod-rank-filter" onchange="renderModTable()">
@@ -1832,19 +1846,7 @@ function submitEntry() {
   closeFormModal();
   if(typeof renderModTable === 'function') renderModTable();
   if(typeof rebuildBrowse === 'function') rebuildBrowse();
-  // Auto-save to Gist if a token is available
   autoGistSave();
-}
-
-async function autoGistSave() {
-  const token = document.getElementById('gist-token-input')?.value?.trim()
-    || localStorage.getItem('gist-token') || '';
-  const gistId = document.getElementById('gist-id-input')?.value?.trim() || '';
-  if (!token || !gistId) return; // silently skip if not configured
-  const saved = await gistSave();
-  if (saved) {
-    markSaved();
-  }
 }
 
 async function deleteEntry(idx) {
@@ -1855,7 +1857,6 @@ async function deleteEntry(idx) {
   showToast('Entry deleted.', 'warn');
   if(typeof renderModTable === 'function') renderModTable();
   if(typeof rebuildBrowse === 'function') rebuildBrowse();
-  // Auto-save to Gist if a token is available
   autoGistSave();
 }
 
@@ -2093,9 +2094,12 @@ function gistMsg(text, err = false) {
   const el = document.getElementById('gist-msg');
   if (el) {
     el.textContent = text;
+    el.style.display = 'block';
     el.style.color = err ? '#fca5a5' : '#94a3b8';
-    el.style.borderLeftColor = err ? 'rgba(239,68,68,0.5)' : 'rgba(255,215,0,0.3)';
   }
+  // Also update the status line
+  const sl = document.getElementById('gist-status-line');
+  if (sl && err) { sl.textContent = '⚠ ' + text; sl.style.color = '#fca5a5'; }
 }
 
 async function gistLoad() {
@@ -2218,19 +2222,101 @@ async function gistSave() {
   }
 }
 
-// Restore Gist settings from localStorage (fall back to public defaults)
+// ==================== GIST SETUP MODAL ====================
+function openGistSetup() {
+  const id    = localStorage.getItem('gist-id')    || document.getElementById('gist-id-input').value || '';
+  const token = localStorage.getItem('gist-token') || '';
+  document.getElementById('gist-id-visible').value    = id;
+  document.getElementById('gist-token-visible').value = token;
+  const overlay = document.getElementById('gist-setup-overlay');
+  overlay.style.display = 'flex';
+}
+function closeGistSetup() {
+  document.getElementById('gist-setup-overlay').style.display = 'none';
+  const msgEl = document.getElementById('gist-msg');
+  if (msgEl) { msgEl.style.display = 'none'; msgEl.textContent = ''; }
+}
+async function saveGistSetup() {
+  const id    = document.getElementById('gist-id-visible').value.trim();
+  const token = document.getElementById('gist-token-visible').value.trim();
+  if (!id) { gistMsg('Enter a Gist ID or URL', true); return; }
+  const resolved = extractGistId(id);
+  if (!resolved) { gistMsg('Invalid Gist ID or URL', true); return; }
+  document.getElementById('gist-id-input').value    = resolved;
+  document.getElementById('gist-file-input').value  = 'entries.json';
+  document.getElementById('gist-token-input').value = token;
+  try {
+    localStorage.setItem('gist-id',   resolved);
+    localStorage.setItem('gist-file', 'entries.json');
+    if (token) localStorage.setItem('gist-token', token);
+    else       localStorage.removeItem('gist-token');
+  } catch(e) {}
+  gistMsg('Connecting…');
+  const loaded = await gistLoad();
+  if (loaded) {
+    updateGistStatusLine();
+    closeGistSetup();
+    showToast('Gist connected! Auto-save is now active.', 'success');
+  }
+}
+function updateGistStatusLine() {
+  const el = document.getElementById('gist-status-line');
+  if (!el) return;
+  const id    = localStorage.getItem('gist-id')    || '';
+  const token = localStorage.getItem('gist-token') || '';
+  if (id && token) {
+    el.textContent = '\u2705 Connected \u2014 changes auto-save to Gist';
+    el.style.color = '#34d399';
+  } else if (id) {
+    el.textContent = '\ud83d\udd17 Read-only \u2014 add a token to enable auto-save';
+    el.style.color = '#fbbf24';
+  } else {
+    el.textContent = 'Not connected \u2014 click Configure to set up';
+    el.style.color = '#94a3b8';
+  }
+}
+
+// ==================== HARD REFRESH ====================
+async function hardRefreshAll() {
+  const ok = await showConfirm('Reload all entries from Gist and clear cached data?', 'Refresh', 'Cancel');
+  if (!ok) return;
+  // Clear autosave caches
+  try {
+    localStorage.removeItem('entries-autosave');
+    localStorage.removeItem('entries-backup');
+  } catch(e) {}
+  // Reload from Gist
+  const loaded = await gistLoad();
+  if (loaded) {
+    showToast('\ud83d\udd04 Everything refreshed from Gist!', 'success');
+  } else {
+    showToast('Refresh failed \u2014 check Gist connection', 'error');
+  }
+}
+
+// ==================== AUTO GIST SAVE ====================
+async function autoGistSave() {
+  const token = document.getElementById('gist-token-input')?.value?.trim()
+    || localStorage.getItem('gist-token') || '';
+  const gistId = document.getElementById('gist-id-input')?.value?.trim() || '';
+  if (!token || !gistId) return;
+  const saved = await gistSave();
+  if (saved) markSaved();
+}
+
+// Restore Gist settings from localStorage on load
 (function() {
   try {
-    const id    = localStorage.getItem('gist-id')   || PUBLIC_GIST_ID;
-    const file  = localStorage.getItem('gist-file') || 'entries.json';
-    const token = localStorage.getItem('gist-token') || sessionStorage.getItem('gist-token');
-    document.getElementById('gist-id-input').value   = id;
-    document.getElementById('gist-file-input').value = file;
-    if (token) document.getElementById('gist-token-input').value = token;
-    // Auto-load on startup if we have a gist ID
-    if (id) setTimeout(() => gistLoad(), 0);
+    const id    = localStorage.getItem('gist-id')    || PUBLIC_GIST_ID;
+    const file  = localStorage.getItem('gist-file')  || 'entries.json';
+    const token = localStorage.getItem('gist-token') || sessionStorage.getItem('gist-token') || '';
+    document.getElementById('gist-id-input').value    = id;
+    document.getElementById('gist-file-input').value  = file;
+    document.getElementById('gist-token-input').value = token;
+    updateGistStatusLine();
+    if (id) setTimeout(() => gistLoad().then(updateGistStatusLine), 0);
   } catch (e) {
-    console.warn('Could not restore Gist settings from localStorage:', e);
+    console.warn('Could not restore Gist settings:', e);
   }
 })();
 
@@ -2367,26 +2453,7 @@ function showGistHelper() {
   showToast('Gist ID pre-filled. Add entries.json to your Gist, then click LOAD. For saving, add a GitHub PAT with "gist" scope.', 'info', 7000);
 }
 
-// Add backup/restore/stats buttons to mod panel
-(function() {
-  const modPanel = document.querySelector('.mod-panel-header');
-  if (modPanel) {
-    const existing = modPanel.querySelector('.mod-actions');
-    if (existing && !document.getElementById('smart-buttons-added')) {
-      const smartBtns = document.createElement('div');
-      smartBtns.id = 'smart-buttons-added';
-      smartBtns.style.cssText = 'display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;';
-      smartBtns.innerHTML = `
-        <button onclick="backupEntries()" style="padding: 6px 12px; background: #7c3aed; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">💾 BACKUP</button>
-        <button onclick="restoreEntries()" style="padding: 6px 12px; background: #4f46e5; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">↩ RESTORE</button>
-        <button onclick="findDuplicates()" style="padding: 6px 12px; background: #d97706; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">🔍 DUPES</button>
-        <button onclick="showStats()" style="padding: 6px 12px; background: #059669; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">📊 STATS</button>
-        <button onclick="showGistHelper()" style="padding: 6px 12px; background: #6366f1; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;">❓ GIST HELP</button>
-      `;
-      existing.parentElement.appendChild(smartBtns);
-    }
-  }
-})();
+// (smart buttons now baked into HTML directly)
 
 // Improved search with live filtering
 const originalSearch = handleSearch;
